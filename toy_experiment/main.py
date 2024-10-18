@@ -21,7 +21,6 @@ from models import (
     ConstrainedMlpRmcl,
     ConstrainedMlpV2,
     ConstrainedMlpRmclV2,
-    LiftingDiffusionModel,
     Mlp,
     SquaredReLU,
 )
@@ -53,8 +52,6 @@ def main(cfg: DictConfig):
     cwd = Path(os.getcwd())  # hydra run dir
     output_dir = cwd / cfg.run.experiment
     output_dir.mkdir(parents=True, exist_ok=True)
-    # ckpts_dir = Path(os.getcwd()) / cfg.run.output_dir
-    # ckpts_dir.mkdir(exist_ok=True)
 
     # Set seeds for init reproducibility
     print(f"==> Setting seeds to {cfg.run.seed} for init")
@@ -141,13 +138,7 @@ def main(cfg: DictConfig):
         )
 
     # create model
-    if cfg.diffusion.enabled:
-        model = LiftingDiffusionModel(
-            config=cfg,
-            act=act,
-            device=device,
-        )
-    elif "3D" in cfg.data.scenario:
+    if "3D" in cfg.data.scenario:
         if cfg.model.arch == "mlp":
             model = Mlp(
                 in_features=2,

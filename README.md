@@ -177,7 +177,7 @@ python main_3dhp.py \
     train.batch_size_test=30
 ``` -->
 
-# toy experiments
+# Toy experiments
 
 Figure 4 can be reproduced in ~2 minutes using a ~10GB GPU. Just run the following command:
 ```bash

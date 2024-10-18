@@ -149,3 +149,5 @@ toy_experiment/mlflow/
 
 # Notebooks
 extract_metrics.py
+
+.vscode/
