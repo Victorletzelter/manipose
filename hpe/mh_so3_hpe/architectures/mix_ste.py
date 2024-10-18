@@ -56,13 +56,9 @@ class MixSTE(nn.Module):
             in_chans,
             embed_dim,
         )
-        self.Spatial_pos_embed = nn.Parameter(
-            torch.zeros(1, num_joints, embed_dim)
-        )
+        self.Spatial_pos_embed = nn.Parameter(torch.zeros(1, num_joints, embed_dim))
 
-        self.Temporal_pos_embed = nn.Parameter(
-            torch.zeros(1, num_frame, embed_dim)
-        )
+        self.Temporal_pos_embed = nn.Parameter(torch.zeros(1, num_frame, embed_dim))
 
         self.pos_drop = nn.Dropout(p=drop_rate)
 
@@ -327,13 +323,11 @@ class Block(nn.Module):
         # Residual connection should be scaled with muP when wanting to
         # generalize across depth, according to
         # https://arxiv.org/abs/2309.16620
-        self.residual_scale = 1 / sqrt(depth) if mup else 1.
+        self.residual_scale = 1 / sqrt(depth) if mup else 1.0
 
         # NOTE: drop path for stochastic depth, we shall see if this is better
         # than dropout here
-        self.drop_path = (
-            DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
-        )
+        self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(
@@ -350,12 +344,8 @@ class Block(nn.Module):
         self.vis = vis
 
     def forward(self, x, vis=False):
-        x = x * self.residual_scale + self.drop_path(
-            self.attn(self.norm1(x), vis=vis)
-        )
-        x = x * self.residual_scale + self.drop_path(
-            self.mlp(self.norm2(x))
-        )
+        x = x * self.residual_scale + self.drop_path(self.attn(self.norm1(x), vis=vis))
+        x = x * self.residual_scale + self.drop_path(self.mlp(self.norm2(x)))
 
         if self.changedim and self.currentdim < self.depth // 2:
             x = rearrange(x, "b t c -> b c t")

@@ -67,17 +67,11 @@ class Skeleton(object):
             jointwise_metadata.pop(i_to_pop)
 
         # Unzip
-        self._joints_names, ljoints_mask, rjoints_mask = zip(
-            *jointwise_metadata
-        )
+        self._joints_names, ljoints_mask, rjoints_mask = zip(*jointwise_metadata)
 
         # Convert l/r masks back to indices
-        self._joints_left = [
-            i for i, is_left in enumerate(ljoints_mask) if is_left
-        ]
-        self._joints_right = [
-            i for i, is_right in enumerate(rjoints_mask) if is_right
-        ]
+        self._joints_left = [i for i, is_left in enumerate(ljoints_mask) if is_left]
+        self._joints_right = [i for i, is_right in enumerate(rjoints_mask) if is_right]
 
         # Update other metadata
         self._compute_metadata()
@@ -98,21 +92,16 @@ class Skeleton(object):
                 self._children[parent].append(i)
 
         # Creates bones as a tuple of (joint, joint_parent) tuples
-        self._bones = tuple(
-            (j, p) for j, p in enumerate(self._parents) if p >= 0
-        )
+        self._bones = tuple((j, p) for j, p in enumerate(self._parents) if p >= 0)
 
         self._bones_names = tuple(
-            f"{self._joints_names[j]}->{self._joints_names[i]}"
-            for i, j in self._bones
+            f"{self._joints_names[j]}->{self._joints_names[i]}" for i, j in self._bones
         )
 
         # Creates left and right bones indices list
         bone_parent = dict(self._bones)
         bone_index = {b: i for i, b in enumerate(self._bones)}
-        skeleton_left = tuple(
-            (j, bone_parent[j]) for j in self._joints_left if j >= 0
-        )
+        skeleton_left = tuple((j, bone_parent[j]) for j in self._joints_left if j >= 0)
         skeleton_right = tuple(
             (j, bone_parent[j]) for j in self._joints_right if j >= 0
         )

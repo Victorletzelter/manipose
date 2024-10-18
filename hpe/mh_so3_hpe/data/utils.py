@@ -92,9 +92,7 @@ def fetch(
             poses_2d = keypoints[subject][action]
             for i in range(len(poses_2d)):  # Iterate across cameras
                 out_poses_2d.append(poses_2d[i])
-                out_actions.append(
-                    [action.split(" ")[0]] * poses_2d[i].shape[0]
-                )
+                out_actions.append([action.split(" ")[0]] * poses_2d[i].shape[0])
                 augmented_cam = np.concatenate(
                     [
                         cams[i]["intrinsic"],
@@ -103,9 +101,7 @@ def fetch(
                         np.array([i]),
                     ]
                 )
-                out_camera_params.append(
-                    [augmented_cam] * poses_2d[i].shape[0]
-                )
+                out_camera_params.append([augmented_cam] * poses_2d[i].shape[0])
 
             if parse_3d_poses and "positions_3d" in dataset[subject][action]:
                 poses_3d = dataset[subject][action]["positions_3d"]

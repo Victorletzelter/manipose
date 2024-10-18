@@ -33,10 +33,7 @@ def evaluate(
         m_p3d_h36 = 0
 
         # We only compute oracle metrics for rMCL
-        compute_oracle = compute_oracle and isinstance(
-            model,
-            RMCLManifoldMixSTE
-        )
+        compute_oracle = compute_oracle and isinstance(model, RMCLManifoldMixSTE)
         if compute_oracle:
             oracle_mpjpe_total = 0
             psoracle_mpjpe_total = 0
@@ -86,9 +83,7 @@ def evaluate(
                         hypothesis_flipped = model.concat_hyp_and_scores(
                             *predictions_flipped
                         )
-                        predictions_flipped = model.aggregate(
-                            *predictions_flipped
-                        )
+                        predictions_flipped = model.aggregate(*predictions_flipped)
 
                         # Flipped oracle computation and averaging
                         if compute_oracle:
@@ -101,9 +96,7 @@ def evaluate(
                                 ground_truth=target_3d,
                                 mode="oracle",
                             )
-                            oracle_preds = (
-                                oracle_preds + oracle_preds_flipped
-                            ) / 2
+                            oracle_preds = (oracle_preds + oracle_preds_flipped) / 2
 
                             oracle_mpjpe = mpjpe_error(
                                 oracle_preds,
@@ -152,15 +145,12 @@ def evaluate(
                     target_3d=target_3d,
                 )
 
-                return_hyps = (
-                    return_hyps and isinstance(model, RMCLManifoldMixSTE)
-                )
+                return_hyps = return_hyps and isinstance(model, RMCLManifoldMixSTE)
                 if return_hyps:
                     hypothesis[..., :-1] *= 1000  # scaling only hyps to mm
                     all_predictions.append(hypothesis)
                 else:
                     all_predictions.append(renorm_pred_pose)
-
 
                 mpjpe_total += mpjpe_current.item()
                 m_p3d_h36 += mpjpe_p3d_h36.cpu().data.numpy()
@@ -189,9 +179,9 @@ def evaluate(
             else:
                 # Oracle metrics were already normalized by J, so only need to
                 # divide by n and L. They alse weren't converted to mm.
-                oracle_mpjpe_total /= (n * L)
+                oracle_mpjpe_total /= n * L
                 oracle_mpjpe_total *= 1000
-                psoracle_mpjpe_total /= (n * L)
+                psoracle_mpjpe_total /= n * L
                 psoracle_mpjpe_total *= 1000
                 return (
                     all_predictions,

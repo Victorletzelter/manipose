@@ -4,7 +4,6 @@ from collections import OrderedDict
 from copy import deepcopy
 from typing import Optional
 import os
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -16,8 +15,7 @@ from omegaconf import OmegaConf
 from torch import nn
 from torch.nn.functional import mse_loss
 from training import Trainer, calc_mpjpe
-from utils.plot_utils import (plot_angular_density, plot_circle,
-                              plot_predictions)
+from utils.plot_utils import plot_angular_density, plot_circle, plot_predictions
 from utils.utils import polar2cartesian
 
 # %% -- RANDOMNESS
@@ -89,6 +87,7 @@ print(figures_dir)
 if not os.path.exists(figures_dir):
     os.mkdir(figures_dir)
 
+
 def plot_setting(
     radius=1.0,
     offset=2.0,
@@ -104,7 +103,7 @@ def plot_setting(
         show_input_ax_label=True,
         inputs_offset=offset,
         show_output_axs=True,
-        ax=ax
+        ax=ax,
     )
 
     # plot input and output example
@@ -113,9 +112,9 @@ def plot_setting(
     x_pos = np.cos(ang_pos_example)
     y_pos = np.sin(ang_pos_example)
 
-    input_J0 = np.array([0., -offset])
+    input_J0 = np.array([0.0, -offset])
     input_J1 = np.array([x_pos, -offset])
-    output_J0 = np.array([0., 0.])
+    output_J0 = np.array([0.0, 0.0])
     output_J1 = np.array([x_pos, y_pos])
     output = np.stack([output_J0, output_J1], axis=0)
 
@@ -134,26 +133,26 @@ def plot_setting(
 
     # show inputs and outputs
     ax.vlines(
-        x=[0., x_pos],
+        x=[0.0, x_pos],
         ymin=[-offset] * 2,
-        ymax=[0., y_pos],
+        ymax=[0.0, y_pos],
         ls="--",
         lw=1.5,
         color="grey",
-        zorder=0
+        zorder=0,
     )
     if show_angle:
         angle = Arc(
-            xy=(0., 0.),
+            xy=(0.0, 0.0),
             width=0.5 * radius,
             height=0.5 * radius,
-            angle=0.,
-            theta1=0.,
+            angle=0.0,
+            theta1=0.0,
             theta2=ang_pos_example * 180 / np.pi,
             color="grey",
-            linewidth=1.5
+            linewidth=1.5,
         )
-        ax.add_patch(angle) # To display the angle arc
+        ax.add_patch(angle)  # To display the angle arc
         ax.text(0.3 * radius, 0.1 * radius, r"$\theta$")
 
     if display_legend:
@@ -186,7 +185,8 @@ def plot_dist_and_samples(
     # fig = plt.figure(figsize=(8, 6))
     # fig = plt.figure(figsize=(15, 12))
     ax = plot_angular_density(
-        t, pdf * 0.5,
+        t,
+        pdf * 0.5,
         colour=GT_COL,
         # colour="green",
         show_ticks=False,
@@ -203,7 +203,7 @@ def plot_dist_and_samples(
             Y[:, 1],
             marker="o",
             label="Outputs",
-            c=GT_COL
+            c=GT_COL,
             # c=palette[1],
             # alpha=0.5
         )
@@ -260,7 +260,11 @@ def plot_predictions(
     omit_targets: bool = False,
 ):
     fig, ax = plot_dist_and_samples(
-        distribution, X_test, Y_test, offset, ax=ax,
+        distribution,
+        X_test,
+        Y_test,
+        offset,
+        ax=ax,
         display_legend=display_legend,
         omit_targets=omit_targets,
     )
@@ -285,6 +289,7 @@ def plot_predictions(
     plt.tight_layout()
 
     save_fig_and_log(fig, save_path, log_to_mlf)
+
 
 # %% - FUNCTION FOR TRAINING AND PLOTTING PREDICTIONS
 
@@ -339,20 +344,16 @@ def train_and_plot_preds(
     else:
         sched_cls = None
 
-    if (
-        preds_per_model is None or
-        hyps_per_model is None or
-        trained_models is None
-    ):
+    if preds_per_model is None or hyps_per_model is None or trained_models is None:
         preds_per_model = {}
         trained_models = {}
         hyps_per_model = {}
 
     for model_name, tr_config in zip(models_names, tr_configs):
         if (
-            model_name not in preds_per_model or
-            model_name not in hyps_per_model or
-            model_name not in trained_models
+            model_name not in preds_per_model
+            or model_name not in hyps_per_model
+            or model_name not in trained_models
         ):
             cfg.train.update(tr_config)
 
@@ -406,7 +407,7 @@ def train_and_plot_preds(
                 loader=train_loader,
                 loss_func=mse_loss,
                 val_data=datasets.validation_set,
-                log_in_mlf=False
+                log_in_mlf=False,
             )
 
             _, (test_predictions,), pred_hypothesis = trainer.eval(
@@ -464,6 +465,7 @@ def train_and_plot_preds(
 
     return preds_per_model, trained_models, hyps_per_model
 
+
 # %% - FUNCTION TO PLOT ORACLES AND PREDICTIONS
 
 
@@ -506,7 +508,8 @@ def plot_oracle_and_pred(
     t = np.linspace(0, 2 * np.pi, 1000, endpoint=False)
     pdf = distribution.pdf(t)
     ax = plot_angular_density(
-        t, pdf * 0.5,
+        t,
+        pdf * 0.5,
         colour=GT_COL,
         # colour="green",
         show_ticks=False,
@@ -559,12 +562,17 @@ def plot_oracle_and_pred(
         euclidean_oracle[:, 1],
         marker="o",
         label="MSE minimizer",
-        c=MLP_COL
+        c=MLP_COL,
         # c=palette[3],
     )
     ax.vlines(
-        query, -inputs_offset, np.sin(distribution.modes[0]),
-        linestyle="--", color='grey', lw=1.5, zorder=0
+        query,
+        -inputs_offset,
+        np.sin(distribution.modes[0]),
+        linestyle="--",
+        color="grey",
+        lw=1.5,
+        zorder=0,
     )
 
     # plot Riemannian oracle
@@ -595,6 +603,7 @@ def plot_oracle_and_pred(
 
     save_fig_and_log(plt.gcf(), save_path=save_path, log_to_mlf=False)
     return ax
+
 
 # %% - SAMPLE FROM EASY DIST
 n_train = 1000
@@ -724,25 +733,27 @@ preds_per_model_h2, trained_models_h2, hyps_per_model_h2 = train_and_plot_preds(
 
 # creating special query for which the oracle outputs are easy to compute
 
-query_input = np.unique(np.cos(hard2_distribution.modes), )[None, :]
+query_input = np.unique(
+    np.cos(hard2_distribution.modes),
+)[None, :]
 
 euclidean_oracle_height = np.sum(
     np.sin(hard2_distribution.modes) * hard2_distribution.weights,
     keepdims=True,
 )[:, None]
 
-acceptable_outputs = np.hstack([
-    np.cos(hard2_distribution.modes)[:, None],
-    np.sin(hard2_distribution.modes)[:, None]
-])
+acceptable_outputs = np.hstack(
+    [
+        np.cos(hard2_distribution.modes)[:, None],
+        np.sin(hard2_distribution.modes)[:, None],
+    ]
+)
 
 acceptable_outputs_probs = hard2_distribution.weights
 
 euclidean_oracle_output = np.hstack([query_input, euclidean_oracle_height])
 
-angular_oracle = np.sum(
-    hard2_distribution.modes * hard2_distribution.weights
-)
+angular_oracle = np.sum(hard2_distribution.modes * hard2_distribution.weights)
 
 manifold_oracle_output = np.array(
     polar2cartesian(r=radius, theta=angular_oracle),
@@ -795,7 +806,8 @@ ax = plot_oracle_and_pred(
     euclidean_oracle=euclidean_oracle_output,
     riemanian_oracle=manifold_oracle_output,
     models={
-        name: model for name, model in trained_models_h2.items()
+        name: model
+        for name, model in trained_models_h2.items()
         if name != "constrained_rmcl"
     },
     inputs_offset=1.5,
@@ -807,16 +819,15 @@ ax = plot_oracle_and_pred(
 
 
 rmcl_model = trained_models_h2["constrained_rmcl"]
-fake_query_batch = torch.from_numpy(
-    query_input).float().to("cuda").repeat((10, 1))
+fake_query_batch = torch.from_numpy(query_input).float().to("cuda").repeat((10, 1))
 with torch.no_grad():
     rmcl_hyps = rmcl_model(fake_query_batch)[:1, :].cpu().numpy()
 
 
 with torch.no_grad():
-    rmcl_agg_pred = rmcl_model.aggregate(
-        rmcl_model(fake_query_batch)
-    )[:1, :].cpu().numpy()
+    rmcl_agg_pred = (
+        rmcl_model.aggregate(rmcl_model(fake_query_batch))[:1, :].cpu().numpy()
+    )
 
 
 # palette = sns.color_palette("muted")
@@ -910,10 +921,11 @@ def plot_hyps(hyps_per_model, ax):
                     c=METHODS_COLORS[model_name],
                     ls="--",
                     alpha=0.6,
-                    lw=2.,
+                    lw=2.0,
                     label=(
                         f"{METHODS_NAMES[model_name]} - " + r"scores $\gamma_k$"
-                        if hyp_idx > 0 else None
+                        if hyp_idx > 0
+                        else None
                     ),
                 )
 
@@ -947,7 +959,8 @@ def group_plot(data_dict, save_path):
 
     # Create axes
     fig, ax_list = plt.subplots(
-        1, len(data_dict),
+        1,
+        len(data_dict),
         sharex=True,
         sharey=True,
         figsize=(PAGE_WIDTH, PAGE_WIDTH / 2),
@@ -976,8 +989,9 @@ def group_plot(data_dict, save_path):
     handles, labels = ax.get_legend_handles_labels()
     by_label = OrderedDict(zip(labels, handles))  # removes duplicate legends
     fig.legend(
-        by_label.values(), by_label.keys(),
-        loc='lower center',
+        by_label.values(),
+        by_label.keys(),
+        loc="lower center",
         ncol=3,
     )
     plt.tight_layout(rect=[0, 0.1, 1, 1])
@@ -994,36 +1008,38 @@ def group_plot(data_dict, save_path):
 
 # %% PLOT SETTING AND ORACLE ON SAME FIGURE
 
+
 def create_oracle_minimizers(data_dict):
     trained_models_h2 = deepcopy(data_dict["C)"]["trained_models"])
     hard2_distribution = deepcopy(data_dict["C)"]["distribution"])
     if "constrained_rmcl" in trained_models_h2:
         trained_models_h2_no_rmcl = {
-            k: v for k, v in trained_models_h2.items()
-            if k != "constrained_rmcl"
+            k: v for k, v in trained_models_h2.items() if k != "constrained_rmcl"
         }
     else:
         trained_models_h2_no_rmcl = trained_models_h2
 
-    query_input = np.unique(np.cos(hard2_distribution.modes), )[None, :]
+    query_input = np.unique(
+        np.cos(hard2_distribution.modes),
+    )[None, :]
 
     euclidean_oracle_height = np.sum(
         np.sin(hard2_distribution.modes) * hard2_distribution.weights,
         keepdims=True,
     )[:, None]
 
-    acceptable_outputs = np.hstack([
-        np.cos(hard2_distribution.modes)[:, None],
-        np.sin(hard2_distribution.modes)[:, None]
-    ])
+    acceptable_outputs = np.hstack(
+        [
+            np.cos(hard2_distribution.modes)[:, None],
+            np.sin(hard2_distribution.modes)[:, None],
+        ]
+    )
 
     acceptable_outputs_probs = hard2_distribution.weights
 
     euclidean_oracle_output = np.hstack([query_input, euclidean_oracle_height])
 
-    angular_oracle = np.sum(
-        hard2_distribution.modes * hard2_distribution.weights
-    )
+    angular_oracle = np.sum(hard2_distribution.modes * hard2_distribution.weights)
 
     manifold_oracle_output = np.array(
         polar2cartesian(r=1.0, theta=angular_oracle),
@@ -1044,7 +1060,8 @@ def group_plot_setting(data_dict, save_path):
 
     # Create axes
     fig, (ax1, ax2) = plt.subplots(
-        1, 2,
+        1,
+        2,
         sharex=True,
         sharey=True,
         # figsize=(TEXT_WIDTH, TEXT_WIDTH / 2),
@@ -1090,14 +1107,16 @@ def group_plot_setting(data_dict, save_path):
     labels += labels2
     by_label = OrderedDict(zip(labels, handles))  # removes duplicate legends
     fig.legend(
-        by_label.values(), by_label.keys(),
-        loc='lower center',
+        by_label.values(),
+        by_label.keys(),
+        loc="lower center",
         ncol=3,
     )
     fig.tight_layout(rect=[0, 0.2, 1, 1])
 
     if save_path is not None:
         fig.savefig(save_path, bbox_inches="tight")
+
 
 # %%
 
@@ -1106,13 +1125,15 @@ def group_plot_setting(data_dict, save_path):
 # group_plot_setting(data_dict, save_path=save_path)
 # %%
 
+
 def plot_single_figure(data_dict, save_path, col=True):
     setup_style(grid=False, column_fig=False)
 
     # Create axes
     if col:
         fig, ax_arr = plt.subplots(
-            2, 2,
+            2,
+            2,
             sharex=True,
             sharey=True,
             # figsize=(TEXT_WIDTH, TEXT_WIDTH / 2),
@@ -1125,7 +1146,8 @@ def plot_single_figure(data_dict, save_path, col=True):
         ax_list = [ax1, ax2, ax3, ax4]
     else:
         fig, ax_list = plt.subplots(
-            1, 4,
+            1,
+            4,
             sharex=True,
             sharey=True,
             # figsize=(TEXT_WIDTH, TEXT_WIDTH / 2),
@@ -1133,7 +1155,7 @@ def plot_single_figure(data_dict, save_path, col=True):
         )
         ax1, ax2, ax3, ax4 = ax_list
 
-    # 
+    #
 
     # Plot setting
     plot_setting(
@@ -1225,16 +1247,18 @@ def plot_single_figure(data_dict, save_path, col=True):
     ]
     unord_labels = dict(zip(labels, handles))
     by_label = OrderedDict({k: unord_labels[k] for k in desired_order})
-    n_col = 3 if col else 6    
+    n_col = 3 if col else 6
     fig.legend(
-        by_label.values(), by_label.keys(),
-        loc='lower center',
+        by_label.values(),
+        by_label.keys(),
+        loc="lower center",
         ncol=n_col,
     )
     fig.tight_layout(rect=[0, 0.1, 1, 1])
 
     if save_path is not None:
         fig.savefig(save_path, bbox_inches="tight")
+
 
 # %%
 # I need to:

@@ -28,15 +28,12 @@ def forward_kinematics(
             rotations_world.append(rotations[:, 0])
         else:
             parent = skeleton.parents[j]
-            offset = (
-                t_pose[:, j, :] - t_pose[:, parent, :]
-            ).view(-1, 3, 1)
+            offset = (t_pose[:, j, :] - t_pose[:, parent, :]).view(-1, 3, 1)
             parent_rot_mat = rotations_world[parent]
             rot_mat = parent_rot_mat.matmul(rotations[:, j])
 
             positions_world.append(
-                rot_mat.matmul(offset).view(-1, 3) +
-                positions_world[parent]
+                rot_mat.matmul(offset).view(-1, 3) + positions_world[parent]
             )
             if skeleton.has_children[j]:
                 rotations_world.append(rot_mat)

@@ -169,6 +169,6 @@ def smoothness_regularization(
 
     assert weights.shape[0] == velocity_predicted.shape[-2]
     return torch.mean(
-        weights[None, None, :, None].to(velocity_predicted.device) *
-        velocity_predicted**2
+        weights[None, None, :, None].to(velocity_predicted.device)
+        * velocity_predicted**2
     )

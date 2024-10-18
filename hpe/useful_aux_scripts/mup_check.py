@@ -119,8 +119,7 @@ make_base_shapes(base_model, delta_model, base_shape_file_path)
 def lazy_model(width, seq_len=27):
     # `set_base_shapes` returns the model
     return lambda: set_base_shapes(
-        create_model(width, seq_len=seq_len),
-        base_shape_file_path
+        create_model(width, seq_len=seq_len), base_shape_file_path
     )
     # Note: any custom initialization with `mup.init` would need to
     # be done inside the lambda as well

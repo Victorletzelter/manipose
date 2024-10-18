@@ -19,7 +19,7 @@ class HardUnimodalDist(LiftingDist1Dto2D):
         super().__init__(
             radius=radius,
             weights=[1.0],
-            modes=[0.],
+            modes=[0.0],
             dispersions=[20],
             random_state=random_state,
         )
@@ -29,7 +29,7 @@ class HardBimodalDist(LiftingDist1Dto2D):
     def __init__(self, radius: float, random_state: int):
         super().__init__(
             radius=radius,
-            weights=[2/3, 1/3],
+            weights=[2 / 3, 1 / 3],
             modes=[np.pi / 3, -np.pi / 3],
             dispersions=[20] * 2,
             random_state=random_state,

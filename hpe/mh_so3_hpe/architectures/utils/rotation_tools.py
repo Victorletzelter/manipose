@@ -10,7 +10,7 @@ def normalize_vector(v):
         v_mag,
         torch.autograd.Variable(  # I can probably clean this below
             torch.FloatTensor([1e-8]).cuda()
-        )
+        ),
     )
     v_mag = v_mag.view(batch, 1).expand(batch, v.shape[1])
     v = v / v_mag
@@ -20,20 +20,19 @@ def normalize_vector(v):
 # u, v batch*n
 def cross_product(u, v):
     batch = u.shape[0]
-    i = u[:, 1]*v[:, 2] - u[:, 2]*v[:, 1]
-    j = u[:, 2]*v[:, 0] - u[:, 0]*v[:, 2]
-    k = u[:, 0]*v[:, 1] - u[:, 1]*v[:, 0]
+    i = u[:, 1] * v[:, 2] - u[:, 2] * v[:, 1]
+    j = u[:, 2] * v[:, 0] - u[:, 0] * v[:, 2]
+    k = u[:, 0] * v[:, 1] - u[:, 1] * v[:, 0]
 
     out = torch.cat(
-        (i.view(batch, 1), j.view(batch, 1), k.view(batch, 1)),
-        1
+        (i.view(batch, 1), j.view(batch, 1), k.view(batch, 1)), 1
     )  # batch*3
 
     return out
 
 
 def compute_rotation_matrix_from_ortho6d(poses):
-    """ Conversion from 6D rotation representation to 3x3 rotation matrix as
+    """Conversion from 6D rotation representation to 3x3 rotation matrix as
     proposed in [1]_.
 
     References
@@ -58,7 +57,7 @@ def compute_rotation_matrix_from_ortho6d(poses):
 
 
 def compute_rotation_matrix_from_ortho4d(poses):
-    """ New conversion from 4D rotation representation to 3x3 rotation matrix
+    """New conversion from 4D rotation representation to 3x3 rotation matrix
     constrained to an identity rotation in the last axis, thus continuously
     representing spherical coordinates
     """
@@ -70,46 +69,31 @@ def compute_rotation_matrix_from_ortho4d(poses):
     cs_phi = normalize_vector(cs_phi_raw)  # batch*2
 
     theta_y = torch.cat(
-        [
-            cs_theta,
-            torch.zeros((batch_size, 1), device=cs_theta.device)
-        ],
-        dim=1
+        [cs_theta, torch.zeros((batch_size, 1), device=cs_theta.device)], dim=1
     )
-    theta_z = torch.tensor(
-        [0, 0, 1],
-        device=cs_theta.device,
-    ).view(1, 3).expand(batch_size, -1)
+    theta_z = (
+        torch.tensor(
+            [0, 0, 1],
+            device=cs_theta.device,
+        )
+        .view(1, 3)
+        .expand(batch_size, -1)
+    )
     theta_x = cross_product(theta_y, theta_z)
 
     phi_y = torch.cat(
-        [
-            torch.zeros((batch_size, 1), device=cs_phi.device),
-            cs_phi
-        ],
-        dim=1
+        [torch.zeros((batch_size, 1), device=cs_phi.device), cs_phi], dim=1
     )
-    phi_x = torch.tensor(
-        [1, 0, 0],
-        device=cs_phi.device
-    ).view(1, 3).expand(batch_size, -1)
+    phi_x = (
+        torch.tensor([1, 0, 0], device=cs_phi.device).view(1, 3).expand(batch_size, -1)
+    )
     phi_z = cross_product(phi_x, phi_y)
 
     R_theta = torch.cat(
-        (
-            theta_x.view(-1, 3, 1),
-            theta_y.view(-1, 3, 1),
-            theta_z.view(-1, 3, 1)
-        ),
-        dim=2
+        (theta_x.view(-1, 3, 1), theta_y.view(-1, 3, 1), theta_z.view(-1, 3, 1)), dim=2
     )
     R_phi = torch.cat(
-        (
-            phi_x.view(-1, 3, 1),
-            phi_y.view(-1, 3, 1),
-            phi_z.view(-1, 3, 1)
-        ),
-        dim=2
+        (phi_x.view(-1, 3, 1), phi_y.view(-1, 3, 1), phi_z.view(-1, 3, 1)), dim=2
     )
 
     matrix = R_theta.bmm(R_phi)  # batch*3*3

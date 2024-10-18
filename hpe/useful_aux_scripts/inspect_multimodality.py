@@ -33,7 +33,6 @@ def gen_config():
     return config
 
 
-
 # %% - load minimum data config
 os.chdir("..")
 config = gen_config()
@@ -71,6 +70,7 @@ keypoints = create_2d_data(inputs_path, dataset)
 TEXT_WIDTH = 3.25
 PAGE_WIDTH = 6.875
 FONTSIZE = 10
+
 
 def setup_style(grid=False, column_fig=False, fontsize=FONTSIZE):
     # plt.style.use("seaborn-paper")
@@ -115,6 +115,7 @@ pretty_joint_names = {
 
 # %% - fetch corresponding data and put on a dataframe
 
+
 def get_data(subject, joint, action, camera):
     out_poses_3d, out_poses_2d, out_actions, out_camera_params = fetch(
         subjects=[subject],
@@ -123,9 +124,7 @@ def get_data(subject, joint, action, camera):
         action_filter=[action],
     )
 
-    joint_index = np.where(
-        np.array(dataset.skeleton.joints_names) == joint
-    )[0][0]
+    joint_index = np.where(np.array(dataset.skeleton.joints_names) == joint)[0][0]
 
     out_poses_3d = out_poses_3d[camera]
 
@@ -135,48 +134,47 @@ def get_data(subject, joint, action, camera):
 
     coordinates_df = pd.DataFrame(
         np.stack(
-        # np.concatenate(
+            # np.concatenate(
             out_poses_3d,
-            axis=0
+            axis=0,
         )[:, joint_index, :],
-        columns=["x", "y", "z"]
+        columns=["x", "y", "z"],
     )
 
     keypoints_df = pd.DataFrame(
         np.stack(
-        # np.concatenate(
+            # np.concatenate(
             out_poses_2d,
-            axis=0
+            axis=0,
         )[:, joint_index, :],
-        columns=["u", "v"]
+        columns=["u", "v"],
     )
 
     return pd.concat([coordinates_df, keypoints_df], axis=1)
 
+
 # %%
 def get_data_all_cams(subject, joint, action):
     dfs = [
-        get_data(
-            subject=subject,
-            joint=joint,
-            action=action,
-            camera=camera
-        )
+        get_data(subject=subject, joint=joint, action=action, camera=camera)
         for camera in range(4)
     ]
 
     return pd.concat(dfs, axis=0).reset_index(drop=True)
 
+
 # %% - plot and save GT joint position propability density projected onto
 # (x,z) and (y,z) planes
 
+
 def plot_dist(coordinates_df, u_cond=None, v_cond=None):
     fig, (ax1, ax2) = plt.subplots(
-        1, 2,
+        1,
+        2,
         # figsize=(PAGE_WIDTH, 2 * TEXT_WIDTH),
         figsize=(TEXT_WIDTH, TEXT_WIDTH / 2),
         sharex=True,
-        sharey=True
+        sharey=True,
     )
 
     sns.kdeplot(data=coordinates_df, x="u", y="z", ax=ax1, fill=True)
@@ -200,6 +198,8 @@ def plot_dist(coordinates_df, u_cond=None, v_cond=None):
     fig.savefig(
         figures_dir / f"multimod_density_{joint}_{subject}_{action}_{camera}.pdf"
     )
+
+
 # %%
 
 subject = "S1"
@@ -208,7 +208,7 @@ action = "sittingdown"
 # camera = 0
 
 coordinates_df = get_data_all_cams(
-# coordinates_df = get_data(
+    # coordinates_df = get_data(
     subject=subject,
     joint=joint,
     action=action,
@@ -226,7 +226,7 @@ action = "greeting"
 # camera = 0
 
 coordinates_df = get_data_all_cams(
-# coordinates_df = get_data(
+    # coordinates_df = get_data(
     subject=subject,
     joint=joint,
     action=action,
@@ -242,7 +242,7 @@ action = "walking"
 # camera = 1
 
 coordinates_df = get_data_all_cams(
-# coordinates_df = get_data(
+    # coordinates_df = get_data(
     subject=subject,
     joint=joint,
     action=action,
@@ -260,7 +260,7 @@ action = "directions"
 # camera = 0
 
 coordinates_df = get_data_all_cams(
-# coordinates_df = get_data(
+    # coordinates_df = get_data(
     subject=subject,
     joint=joint,
     action=action,
@@ -282,6 +282,6 @@ coordinates_df = get_data_all_cams(
     action=action,
 )
 
-camera="all"
+camera = "all"
 plot_dist(coordinates_df, u_cond=-0.19, v_cond=-0.24)
 # %%

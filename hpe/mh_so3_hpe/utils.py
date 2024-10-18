@@ -44,6 +44,7 @@ def save_ckpt(state, ckpt_path, suffix=None, log_in_mlf=False):
     torch.save(state, file_path)
     if log_in_mlf:
         import mlflow as mlf
+
         mlf.log_artifact(file_path)
 
 
@@ -145,6 +146,7 @@ def _explore_recursive(parent_name, element):
 def log_param_to_mlf(key, value, mlflow_on):
     if mlflow_on:
         import mlflow as mlf
+
         try:
             mlf.log_param(key=key, value=value)
         except mlf.exceptions.RestException as e:
@@ -155,6 +157,7 @@ def log_param_to_mlf(key, value, mlflow_on):
 def log_metric_to_mlflow(key, value, mlflow_on, step=None):
     if mlflow_on:
         import mlflow as mlf
+
         try:
             mlf.log_metric(
                 key=key,
@@ -169,6 +172,7 @@ def log_metric_to_mlflow(key, value, mlflow_on, step=None):
 def log_metrics_to_mlflow(metrics, mlflow_on, step=None):
     if mlflow_on:
         import mlflow as mlf
+
         try:
             mlf.log_metrics(
                 metrics=metrics,

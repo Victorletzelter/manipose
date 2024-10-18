@@ -602,9 +602,7 @@ class Human36mDataset(MocapDataset):
                 ).astype("float32")
                 cam["focal_length"] = cam["focal_length"] / cam["res_w"] * 2.0
                 if "translation" in cam:
-                    cam["translation"] = (
-                        cam["translation"] / 1000
-                    )  # mm to meters
+                    cam["translation"] = cam["translation"] / 1000  # mm to meters
 
                 # Add intrinsic parameters vector
                 cam["intrinsic"] = np.concatenate(
@@ -658,7 +656,6 @@ class Human36mDataset(MocapDataset):
                 self._skeleton._parents[14] = 8
                 self._skeleton._joints_group = h36m_skeleton_joints_group_17
                 self._skeleton._compute_metadata()
-
 
     def define_actions(self, action=None):
         all_actions = [

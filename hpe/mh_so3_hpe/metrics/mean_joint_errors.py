@@ -41,7 +41,7 @@ def mse_error(batch_imp, batch_gt, mode):
         batch_imp, batch_gt, mode, shape=(-1,)
     )
 
-    return aggregator(torch.sum((batch_gt - batch_imp)**2, dim=1))
+    return aggregator(torch.sum((batch_gt - batch_imp) ** 2, dim=1))
 
 
 def jointwise_error(batch_imp, batch_gt, mode):
@@ -75,7 +75,7 @@ def jointwise_mse(batch_imp, batch_gt, mode):
     )
 
     return aggregator(
-        torch.sum((batch_gt - batch_imp)**2, dim=2),
+        torch.sum((batch_gt - batch_imp) ** 2, dim=2),
         dim=0,
     )
 
@@ -89,20 +89,26 @@ def _segments_len_err_no_agg(
     B, _, _, L = batch_imp.shape
 
     # (batch_size * series_length, num_bones)
-    pred_bones_lengths = measure_bones_length(
-        batch_imp, skeleton.bones
-    ).permute(0, 2, 1).reshape(B*L, -1)
-    gt_bones_lengths = measure_bones_length(
-        batch_gt, skeleton.bones
-    ).permute(0, 2, 1).reshape(B*L, -1)
+    pred_bones_lengths = (
+        measure_bones_length(batch_imp, skeleton.bones)
+        .permute(0, 2, 1)
+        .reshape(B * L, -1)
+    )
+    gt_bones_lengths = (
+        measure_bones_length(batch_gt, skeleton.bones)
+        .permute(0, 2, 1)
+        .reshape(B * L, -1)
+    )
 
     if mode == "average":
         aggregator = torch.mean
     elif mode == "sum":
         aggregator = torch.sum
     elif mode == "no_agg":
+
         def aggregator(x, dim=None):
             return x
+
     else:
         raise ValueError(
             f"Unexpected value for 'mode' encoutered: {mode}."

@@ -15,5 +15,5 @@ __all__ = [
     "HardBimodalDist",
     "HardQuadmodalDist",
     "LiftingDataset",
-    "LiftingDatasetV2"
+    "LiftingDatasetV2",
 ]

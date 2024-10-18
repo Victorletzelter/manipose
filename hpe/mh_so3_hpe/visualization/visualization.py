@@ -146,14 +146,10 @@ def render_animation(
 
     if downsample > 1:
         keypoints = downsample_tensor(keypoints, downsample)
-        all_frames = downsample_tensor(
-            np.array(all_frames), downsample
-        ).astype("uint8")
+        all_frames = downsample_tensor(np.array(all_frames), downsample).astype("uint8")
         for idx in range(len(poses)):
             poses[idx] = downsample_tensor(poses[idx], downsample)
-            trajectories[idx] = downsample_tensor(
-                trajectories[idx], downsample
-            )
+            trajectories[idx] = downsample_tensor(trajectories[idx], downsample)
         fps /= downsample
 
     render_animation.initialized = False
@@ -185,9 +181,7 @@ def render_animation(
 
         # Update 2D poses
         if not render_animation.initialized:
-            render_animation.image = ax_in.imshow(
-                all_frames[i], aspect="equal"
-            )
+            render_animation.image = ax_in.imshow(all_frames[i], aspect="equal")
 
             for j, j_parent in enumerate(parents):
                 if j_parent == -1:
@@ -227,8 +221,12 @@ def render_animation(
                                     [hyp[j, 2], hyp[j_parent, 2]],
                                     zdir="z",
                                     c=col,
-                                    alpha=hyp[j, 3] * 0.5 + 0.5 if hyp[j, 3] > 0.01 else 0.,  # <-- hyp score
-                                    label=f"{hyp[j, 3]:.2f}" if j == 1 else None
+                                    alpha=(
+                                        hyp[j, 3] * 0.5 + 0.5
+                                        if hyp[j, 3] > 0.01
+                                        else 0.0
+                                    ),  # <-- hyp score
+                                    label=f"{hyp[j, 3]:.2f}" if j == 1 else None,
                                 )
                             )
                         ax.legend(loc="lower center", ncol=3)
@@ -259,12 +257,8 @@ def render_animation(
                 for n, ax in enumerate(ax_3d):
                     pos = poses[n][i]
                     if len(pos.shape) == 2:
-                        lines_3d[n][j - 1][0].set_xdata(
-                            [pos[j, 0], pos[j_parent, 0]]
-                        )
-                        lines_3d[n][j - 1][0].set_ydata(
-                            [pos[j, 1], pos[j_parent, 1]]
-                        )
+                        lines_3d[n][j - 1][0].set_xdata([pos[j, 0], pos[j_parent, 0]])
+                        lines_3d[n][j - 1][0].set_ydata([pos[j, 1], pos[j_parent, 1]])
                         lines_3d[n][j - 1][0].set_3d_properties(
                             [pos[j, 2], pos[j_parent, 2]], zdir="z"
                         )
@@ -282,7 +276,7 @@ def render_animation(
                                 [hyp[j, 2], hyp[j_parent, 2]], zdir="z"
                             )
                             lines_3d[n][multi_hyp_j_idx][0].set_alpha(
-                                hyp[j, 3] * 0.5 + 0.5 if hyp[j, 3] > 0.01 else 0.
+                                hyp[j, 3] * 0.5 + 0.5 if hyp[j, 3] > 0.01 else 0.0
                             )
                             if j == 1:
                                 lines_3d[n][multi_hyp_j_idx][0].set_label(
@@ -310,9 +304,7 @@ def render_animation(
     elif output.endswith(".gif"):
         anim.save(output, dpi=80, writer="imagemagick")
     else:
-        raise ValueError(
-            "Unsupported output format (only .mp4 and .gif are supported)"
-        )
+        raise ValueError("Unsupported output format (only .mp4 and .gif are supported)")
     plt.close()
 
 
@@ -404,9 +396,7 @@ def render_frame_prediction(
 
         # Update 2D poses
         if not render_animation.initialized:
-            render_animation.image = ax_in.imshow(
-                all_frames[i], aspect="equal"
-            )
+            render_animation.image = ax_in.imshow(all_frames[i], aspect="equal")
 
             for j, j_parent in enumerate(parents):
                 if j_parent == -1:
@@ -446,7 +436,11 @@ def render_frame_prediction(
                                     [hyp[j, 2], hyp[j_parent, 2]],
                                     zdir="z",
                                     c=col,
-                                    alpha=hyp[j, 3] * 0.5 + 0.5 if hyp[j, 3] > 0.01 else 0.,  # <-- hyp score
+                                    alpha=(
+                                        hyp[j, 3] * 0.5 + 0.5
+                                        if hyp[j, 3] > 0.01
+                                        else 0.0
+                                    ),  # <-- hyp score
                                     # label=f"{hyp[j, 3]:.2f}" if j == 1 else None
                                 )
                             )
@@ -478,12 +472,8 @@ def render_frame_prediction(
                 for n, ax in enumerate(ax_3d):
                     pos = poses[n][i]
                     if len(pos.shape) == 2:
-                        lines_3d[n][j - 1][0].set_xdata(
-                            [pos[j, 0], pos[j_parent, 0]]
-                        )
-                        lines_3d[n][j - 1][0].set_ydata(
-                            [pos[j, 1], pos[j_parent, 1]]
-                        )
+                        lines_3d[n][j - 1][0].set_xdata([pos[j, 0], pos[j_parent, 0]])
+                        lines_3d[n][j - 1][0].set_ydata([pos[j, 1], pos[j_parent, 1]])
                         lines_3d[n][j - 1][0].set_3d_properties(
                             [pos[j, 2], pos[j_parent, 2]], zdir="z"
                         )
@@ -501,7 +491,7 @@ def render_frame_prediction(
                                 [hyp[j, 2], hyp[j_parent, 2]], zdir="z"
                             )
                             lines_3d[n][multi_hyp_j_idx][0].set_alpha(
-                                hyp[j, 3] * 0.5 + 0.5 if hyp[j, 3] > 0.01 else 0.
+                                hyp[j, 3] * 0.5 + 0.5 if hyp[j, 3] > 0.01 else 0.0
                             )
                             # if j == 1:
                             #     lines_3d[n][multi_hyp_j_idx][0].set_label(
@@ -604,7 +594,7 @@ def render_rotated_frame_prediction(
         for n, ax in enumerate(ax_3d):
             # CHANGE: Mofify azimuth
             ax.view_init(elev=elev, azim=azim_list[k])
-        
+
             ax.set_xlim3d(
                 [
                     -radius / 2 + trajectories[n][i, 0],
@@ -620,9 +610,7 @@ def render_rotated_frame_prediction(
 
         # Update 2D poses
         if not render_animation.initialized:
-            render_animation.image = ax_in.imshow(
-                all_frames[i], aspect="equal"
-            )
+            render_animation.image = ax_in.imshow(all_frames[i], aspect="equal")
 
             for j, j_parent in enumerate(parents):
                 if j_parent == -1:
@@ -674,7 +662,11 @@ def render_rotated_frame_prediction(
                                     [hyp[j, 2], hyp[j_parent, 2]],
                                     zdir="z",
                                     c=col,
-                                    alpha=hyp[j, 3] * 0.5 + 0.5 if hyp[j, 3] > 0.01 else 0.,  # <-- hyp score
+                                    alpha=(
+                                        hyp[j, 3] * 0.5 + 0.5
+                                        if hyp[j, 3] > 0.01
+                                        else 0.0
+                                    ),  # <-- hyp score
                                     # label=f"{hyp[j, 3]:.2f}" if j == 1 else None
                                 )
                             )
@@ -769,7 +761,5 @@ def render_rotated_frame_prediction(
     elif output.endswith(".gif"):
         anim.save(output, dpi=80, writer="imagemagick")
     else:
-        raise ValueError(
-            "Unsupported output format (only .mp4 and .gif are supported)"
-        )
+        raise ValueError("Unsupported output format (only .mp4 and .gif are supported)")
     plt.close()

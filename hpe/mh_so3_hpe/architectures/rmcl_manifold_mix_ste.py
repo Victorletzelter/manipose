@@ -98,9 +98,7 @@ class RMCLManifoldMixSTE(ManifoldMixSTE):
             root_positions=root_positions,
         )
         poses = rearrange(  # (B, H, L, J, 3)
-            poses,
-            "(B H L) J D -> B H L J D",
-            B=B, H=self.n_hyp, L=L
+            poses, "(B H L) J D -> B H L J D", B=B, H=self.n_hyp, L=L
         )
 
         return poses, scores
@@ -111,10 +109,7 @@ class RMCLManifoldMixSTE(ManifoldMixSTE):
         scores: torch.Tensor,
     ) -> torch.Tensor:
         return torch.cat(
-            (
-                hypothesis,
-                scores.unsqueeze(3).expand(-1, -1, -1, self.num_joints, -1)
-            ),
+            (hypothesis, scores.unsqueeze(3).expand(-1, -1, -1, self.num_joints, -1)),
             dim=-1,
         )
 
@@ -146,26 +141,26 @@ class RMCLManifoldMixSTE(ManifoldMixSTE):
         ground_truth: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         if mode == "best_score":
-            assert scores is not None, (
-                "Scores required to compute hypothesis with best confidence."
-            )
+            assert (
+                scores is not None
+            ), "Scores required to compute hypothesis with best confidence."
             best_score_idx = torch.argmax(scores, dim=1)[..., 0]
             return self.poses_from_hyp_idx(
                 hypothesis=hypothesis,
                 hyp_indices=best_score_idx,
             )
         elif mode == "weighted_ave":
-            assert scores is not None, (
-                "Scores required to compute weighted hypothesis average."
-            )
+            assert (
+                scores is not None
+            ), "Scores required to compute weighted hypothesis average."
             return torch.sum(
                 hypothesis * scores.unsqueeze(-1),
                 dim=1,
             )
         elif mode == "oracle":
-            assert ground_truth is not None, (
-                "Ground-truth required to compute best hypothesis."
-            )
+            assert (
+                ground_truth is not None
+            ), "Ground-truth required to compute best hypothesis."
             oracle_mpjpe, oracle_hyp_idx = wta_l2_loss_and_activate_head(
                 hypothesis=hypothesis,
                 y=ground_truth,
@@ -180,8 +175,7 @@ class RMCLManifoldMixSTE(ManifoldMixSTE):
             return oracle_mpjpe, oracle_poses
         else:
             raise ValueError(
-                "Only best_score and weighted_ave modes are implemented."
-                f"Got {mode}."
+                "Only best_score and weighted_ave modes are implemented." f"Got {mode}."
             )
 
 
@@ -232,7 +226,8 @@ class RMCLRotMixSTE(MixSTE):
                     out_dim=out_dim,
                     num_joints=num_joints,
                     mup=mup,
-                ) for _ in range(self.n_hyp)
+                )
+                for _ in range(self.n_hyp)
             ]
         )
 
@@ -266,11 +261,7 @@ class RMCLRotMixSTE(MixSTE):
 
 class MCLHead(nn.Module):
     def __init__(
-        self,
-        embed_dim: int,
-        out_dim: int,
-        num_joints: int,
-        mup: bool = False
+        self, embed_dim: int, out_dim: int, num_joints: int, mup: bool = False
     ):
         super().__init__()
 

@@ -8,7 +8,7 @@ from ..data.skeleton import Skeleton
 
 
 class PoseDecoder(nn.Module):
-    """ Base class implementing decoders from disentangled representations
+    """Base class implementing decoders from disentangled representations
     to 3D keypoints positions
 
     Parameters
@@ -16,6 +16,7 @@ class PoseDecoder(nn.Module):
     skeleton: common.skeleton.Skeleton
         Chosen human body skeleton object.
     """
+
     def __init__(
         self,
         skeleton: Skeleton,
@@ -25,8 +26,7 @@ class PoseDecoder(nn.Module):
         self.skeleton = skeleton
         self.rot_rep_dim = rot_rep_dim
         assert rot_rep_dim in [4, 6], (
-            "Unsupported rotations representation dimension: "
-            f"{self.rot_rep_dim}"
+            "Unsupported rotations representation dimension: " f"{self.rot_rep_dim}"
         )
 
     def forward(
@@ -76,8 +76,7 @@ class PoseDecoder(nn.Module):
             )
         else:
             raise ValueError(
-                "Unsupported rotations representation dimension: "
-                f"{self.rot_rep_dim}"
+                "Unsupported rotations representation dimension: " f"{self.rot_rep_dim}"
             )
 
         return stacked_rot_mat.reshape(BL, J, 3, 3)
@@ -87,7 +86,7 @@ class PoseDecoder(nn.Module):
         bones_lengths_repr: torch.Tensor,  # (B, J, 1)
         BL: int,
     ) -> torch.Tensor:
-        """ Dummy method for computing bones lengths (useful to implement
+        """Dummy method for computing bones lengths (useful to implement
         sagittal symmetry if needed).
         """
         B = bones_lengths_repr.shape[0]
@@ -99,7 +98,7 @@ class PoseDecoder(nn.Module):
         self,
         bones_length: torch.Tensor,
     ) -> torch.Tensor:
-        """ Compute 3D keypoints positions of a skeleton in T-pose using bone
+        """Compute 3D keypoints positions of a skeleton in T-pose using bone
         lengths
         """
         batch_size, n_parts, _ = bones_length.shape
@@ -107,14 +106,12 @@ class PoseDecoder(nn.Module):
         device = bones_length.device
 
         t_pose = torch.zeros(
-            (batch_size, self.skeleton.num_joints, 3),
-            dtype=torch.float,
-            device=device
+            (batch_size, self.skeleton.num_joints, 3), dtype=torch.float, device=device
         )
 
         for b in range(n_parts):
             t_pose[:, b + 1, :] = (
-                t_pose[:, self.skeleton.parents[b + 1], :] +
-                self.skeleton.t_pose_operators[b + 1].to(device) * bones_length[:, b]
+                t_pose[:, self.skeleton.parents[b + 1], :]
+                + self.skeleton.t_pose_operators[b + 1].to(device) * bones_length[:, b]
             )
         return t_pose

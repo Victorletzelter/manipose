@@ -29,9 +29,7 @@ def sparse_mx_to_torch_sparse_tensor(sparse_mx):
 def adj_mx_from_edges(num_pts, edges, sparse=True):
     edges = np.array(edges, dtype=np.int32)
     data, i, j = np.ones(edges.shape[0]), edges[:, 0], edges[:, 1]
-    adj_mx = sp.coo_matrix(
-        (data, (i, j)), shape=(num_pts, num_pts), dtype=np.float32
-    )
+    adj_mx = sp.coo_matrix((data, (i, j)), shape=(num_pts, num_pts), dtype=np.float32)
 
     # build symmetric adjacency matrix
     adj_mx = (

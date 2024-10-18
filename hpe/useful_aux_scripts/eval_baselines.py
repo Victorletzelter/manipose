@@ -9,13 +9,10 @@ from tqdm import tqdm
 from mh_so3_hpe.metrics import sagittal_symmetry, segments_time_consistency
 
 
-
 # %% FETCH DATASET SKELETON
 
 data_dir = Path("/home/crommel/shared/crommel/h36m_data")
-preproc_dataset_path = data_dir / (
-    "preproc_data_3d_h36m_17_mh_so3_hpe.pkl"
-)
+preproc_dataset_path = data_dir / ("preproc_data_3d_h36m_17_mh_so3_hpe.pkl")
 
 if preproc_dataset_path.exists():
     print("==> Loading preprocessed dataset...")
@@ -33,7 +30,7 @@ poseformer_preds = [
     torch.tensor(act_pred).float().permute(1, 0, 2, 3)
     for act_pred in poseformer_preds_dict.values()
 ]
-  # (1, action_leng, J, 3)
+# (1, action_leng, J, 3)
 
 # %%
 
@@ -73,9 +70,7 @@ with open(anatomy3d_preds_path, "rb") as f:
 # %% - CONVERT TO LIST OF TENSORS
 
 for key, arr_list in anatomy3d_preds_dict.items():
-    anatomy3d_preds_dict[key] = np.stack(
-        arr_list, axis=0
-    )
+    anatomy3d_preds_dict[key] = np.stack(arr_list, axis=0)
 
 # %%
 
@@ -123,10 +118,7 @@ with open(mhformer_preds_path, "rb") as f:
 
 for key, arr_list in mhformer_preds_dict.items():
     mhformer_preds_dict[key] = np.concatenate(
-        [
-            arr.reshape(-1, 1, 17, 3)
-            for arr in arr_list
-        ], axis=0
+        [arr.reshape(-1, 1, 17, 3) for arr in arr_list], axis=0
     )
 
 # %%
@@ -175,10 +167,7 @@ with open(stgcn_preds_path, "rb") as f:
 
 for key, arr_list in stgcn_preds_dict.items():
     stgcn_preds_dict[key] = np.concatenate(
-        [
-            arr.reshape(-1, 1, 17, 3)
-            for arr in arr_list
-        ], axis=0
+        [arr.reshape(-1, 1, 17, 3) for arr in arr_list], axis=0
     )
 
 # %%
@@ -227,9 +216,7 @@ with open(videopose_preds_path, "rb") as f:
 # %% - CONVERT TO LIST OF TENSORS
 
 for key, arr_list in videpose_preds_dict.items():
-    videpose_preds_dict[key] = np.stack(
-        arr_list, axis=0
-    )
+    videpose_preds_dict[key] = np.stack(arr_list, axis=0)
 
 # %%
 
@@ -280,7 +267,7 @@ nfpose_preds = [
     torch.cat(act_pred, dim=1).reshape(1, -1, 3, 17).permute(0, 1, 3, 2)
     for act_pred in nfpose_preds_dict.values()
 ]
-  # (1, action_leng, J, 3)
+# (1, action_leng, J, 3)
 
 # %%
 
@@ -328,7 +315,7 @@ for subj_pred in sharma_preds_dict.values():
         sharma_preds.append(
             torch.from_numpy(act_pred["pred"]).float().reshape(1, -1, 17, 3)
         )
-  # (1, action_leng, J, 3)
+# (1, action_leng, J, 3)
 
 # %%
 
@@ -447,22 +434,33 @@ with open(manipose_hyps_path, "rb") as f:
 
 # %%
 from einops import rearrange
-    
+
+
 def calc_jbest_mpjpe(predicted, target):
     B, H, L, J, D = predicted.shape
     target = target.unsqueeze(1).repeat(1, H, 1, 1, 1)
-    errors = torch.norm(predicted - target, dim=len(target.shape)-1)
-    errors = rearrange(errors, 'B H L J  -> H B L J', )
-    min_errors = torch.min(errors, dim=0, keepdim=False).values  # XXX: minimize across hypotheses --> (B, L, J)
+    errors = torch.norm(predicted - target, dim=len(target.shape) - 1)
+    errors = rearrange(
+        errors,
+        "B H L J  -> H B L J",
+    )
+    min_errors = torch.min(
+        errors, dim=0, keepdim=False
+    ).values  # XXX: minimize across hypotheses --> (B, L, J)
     return torch.mean(min_errors)
 
-    
+
 def calc_jbest_pose(predicted, target):
     B, H, L, J, D = predicted.shape
     target = target.unsqueeze(1).repeat(1, H, 1, 1, 1)
-    errors = torch.norm(predicted - target, dim=len(target.shape)-1)
-    errors = rearrange(errors, 'B H L J  -> H B L J', )
-    jbest_idx = torch.argmin(errors, dim=0, keepdim=False)  # XXX: minimize across hypotheses --> (B, L, J)
+    errors = torch.norm(predicted - target, dim=len(target.shape) - 1)
+    errors = rearrange(
+        errors,
+        "B H L J  -> H B L J",
+    )
+    jbest_idx = torch.argmin(
+        errors, dim=0, keepdim=False
+    )  # XXX: minimize across hypotheses --> (B, L, J)
 
     # create J-Best pose
     batch_indices = torch.arange(B)[:, None, None, None].repeat(1, L, J, D)
@@ -479,6 +477,7 @@ def calc_jbest_pose(predicted, target):
     ]
 
     return jbest_pose
+
 
 # %%
 

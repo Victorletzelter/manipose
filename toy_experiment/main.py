@@ -7,20 +7,40 @@ import mlflow as mlf
 import numpy as np
 import torch
 import torch.nn.functional as F
-from data import (EasyDist, HardBimodalDist, HardQuadmodalDist,
-                  HardUnimodalDist, LiftingDataset, LiftingDatasetV2, LiftingDist2Dto3D)
-from models import (ConstrainedMlp, ConstrainedMlpRmcl, ConstrainedMlpV2, ConstrainedMlpRmclV2, LiftingDiffusionModel,
-                    Mlp, SquaredReLU)
+from data import (
+    EasyDist,
+    HardBimodalDist,
+    HardQuadmodalDist,
+    HardUnimodalDist,
+    LiftingDataset,
+    LiftingDatasetV2,
+    LiftingDist2Dto3D,
+)
+from models import (
+    ConstrainedMlp,
+    ConstrainedMlpRmcl,
+    ConstrainedMlpV2,
+    ConstrainedMlpRmclV2,
+    LiftingDiffusionModel,
+    Mlp,
+    SquaredReLU,
+)
 from omegaconf import DictConfig, OmegaConf
 from torch import nn
 from training import Trainer, calc_mpjpe, distance_to_circle, calc_mpjpe_3D, std_length
 from utils.plot_utils import plot_predictions, plot_training_curve
-from utils.utils import (log_params_from_omegaconf_dict,
-                         save_and_log_np_artifact, set_random_seeds)
+from utils.utils import (
+    log_params_from_omegaconf_dict,
+    save_and_log_np_artifact,
+    set_random_seeds,
+)
 import rootutils
 
-rootutils.setup_root(__file__, indicator=".project-root", project_root_env_var=True, pythonpath=True)
+rootutils.setup_root(
+    __file__, indicator=".project-root", project_root_env_var=True, pythonpath=True
+)
 # The above line allows the script to find the project root directory, and to set the PROJECT_ROOT environment variable
+
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
@@ -70,17 +90,23 @@ def main(cfg: DictConfig):
         distribution = LiftingDist2Dto3D(
             major_radius=cfg.data.major_radius,
             minor_radius=cfg.data.minor_radius,
-            weights= [0.3, 0.4,0.2,0.1],
-            modes = [(-3.1415, 0), (0,3.1415/4),(0.5, -3.1415/4), (2*3.1415/3,3.1415/2)],
-            dispersions=[(2,2), (4,4),(3,3),(10,10)],
-            random_state=cfg.run.seed)
+            weights=[0.3, 0.4, 0.2, 0.1],
+            modes=[
+                (-3.1415, 0),
+                (0, 3.1415 / 4),
+                (0.5, -3.1415 / 4),
+                (2 * 3.1415 / 3, 3.1415 / 2),
+            ],
+            dispersions=[(2, 2), (4, 4), (3, 3), (10, 10)],
+            random_state=cfg.run.seed,
+        )
     else:
         raise ValueError(
             "Possible values for scenario are 'easy', 'hard-1', 'hard-2', 'hard-4' or "
             f"'torus-2Dto3D'. Got {cfg.data.scenario}."
         )
-    
-    if '3D' in cfg.data.scenario :
+
+    if "3D" in cfg.data.scenario:
         all_datasets = LiftingDatasetV2(
             distribution=distribution,
             n_train=cfg.data.n_train,
@@ -121,7 +147,7 @@ def main(cfg: DictConfig):
             act=act,
             device=device,
         )
-    elif '3D' in cfg.data.scenario :
+    elif "3D" in cfg.data.scenario:
         if cfg.model.arch == "mlp":
             model = Mlp(
                 in_features=2,
@@ -245,30 +271,59 @@ def main(cfg: DictConfig):
 
         # evaluate
         if cfg.run.test:
-            if '3D' in cfg.data.scenario :
-                (val_mpjpe, test_mpjpe), (_, test_predictions), _, (_,inout),(_,pdf_list) = trainer.eval_3d(
-                eval_sets=(all_datasets.validation_set, all_datasets.test_set),
-                metric=calc_mpjpe_3D,
-                distribution=distribution,
-                major_radius=cfg.data.major_radius,
-                minor_radius=cfg.data.minor_radius,
-            )
-                if cfg.model.arch == "mlp" :
-                    std_length_joint = std_length(test_predictions, joint_prediction=True, major_radius=cfg.data.major_radius, minor_radius=cfg.data.minor_radius)
-                else : 
+            if "3D" in cfg.data.scenario:
+                (
+                    (val_mpjpe, test_mpjpe),
+                    (_, test_predictions),
+                    _,
+                    (_, inout),
+                    (_, pdf_list),
+                ) = trainer.eval_3d(
+                    eval_sets=(all_datasets.validation_set, all_datasets.test_set),
+                    metric=calc_mpjpe_3D,
+                    distribution=distribution,
+                    major_radius=cfg.data.major_radius,
+                    minor_radius=cfg.data.minor_radius,
+                )
+                if cfg.model.arch == "mlp":
+                    std_length_joint = std_length(
+                        test_predictions,
+                        joint_prediction=True,
+                        major_radius=cfg.data.major_radius,
+                        minor_radius=cfg.data.minor_radius,
+                    )
+                else:
                     if "rmcl" in cfg.model.arch:
-                        std_length_joint = std_length(test_predictions, joint_prediction=False, mcl_version=True, major_radius=cfg.data.major_radius, minor_radius=cfg.data.minor_radius)
-                    else :
-                        std_length_joint = std_length(test_predictions, joint_prediction=False, major_radius=cfg.data.major_radius, minor_radius=cfg.data.minor_radius)
+                        std_length_joint = std_length(
+                            test_predictions,
+                            joint_prediction=False,
+                            mcl_version=True,
+                            major_radius=cfg.data.major_radius,
+                            minor_radius=cfg.data.minor_radius,
+                        )
+                    else:
+                        std_length_joint = std_length(
+                            test_predictions,
+                            joint_prediction=False,
+                            major_radius=cfg.data.major_radius,
+                            minor_radius=cfg.data.minor_radius,
+                        )
 
                 mlf.log_metric(key="std_length_joint", value=std_length_joint)
                 mlf.log_metric(key="val_mpjpe", value=val_mpjpe)
                 mlf.log_metric(key="test_mpjpe", value=test_mpjpe)
 
-                warning( "std_length_joint : " + str(std_length_joint) + "\n" +
-                            "val_mpjpe : " + str(val_mpjpe) + "\n" +
-                            "test_mpjpe : " + str(test_mpjpe) + "\n"
-                            )
+                warning(
+                    "std_length_joint : "
+                    + str(std_length_joint)
+                    + "\n"
+                    + "val_mpjpe : "
+                    + str(val_mpjpe)
+                    + "\n"
+                    + "test_mpjpe : "
+                    + str(test_mpjpe)
+                    + "\n"
+                )
 
                 save_and_log_np_artifact(
                     output_dir / "inout.npy",
@@ -293,10 +348,20 @@ def main(cfg: DictConfig):
                 mlf.log_metric(key="val_dtc", value=val_dtc)
                 mlf.log_metric(key="test_dtc", value=test_dtc)
 
-                warning("val_mpjpe : " + str(val_mpjpe) + "\n" +
-                        "test_mpjpe : " + str(test_mpjpe) + "\n" +
-                        "val_dtc : " + str(val_dtc) + "\n" +
-                        "test_dtc : " + str(test_dtc) + "\n")
+                warning(
+                    "val_mpjpe : "
+                    + str(val_mpjpe)
+                    + "\n"
+                    + "test_mpjpe : "
+                    + str(test_mpjpe)
+                    + "\n"
+                    + "val_dtc : "
+                    + str(val_dtc)
+                    + "\n"
+                    + "test_dtc : "
+                    + str(test_dtc)
+                    + "\n"
+                )
 
                 # optionally call function plotting the evaluation results on
                 # circle + saving + logging
@@ -304,17 +369,14 @@ def main(cfg: DictConfig):
                     distribution=distribution,
                     X_test=all_datasets.X_test.cpu().numpy(),
                     Y_test=all_datasets.Y_test.cpu().numpy(),
-                    predictions_dict={
-                        cfg.model.arch: test_predictions.cpu().numpy()
-                    },
+                    predictions_dict={cfg.model.arch: test_predictions.cpu().numpy()},
                     save_path=output_dir / "predictions_plot.png",
                     log_to_mlf=True,
                 )
 
             # save and log predictions
             save_and_log_np_artifact(
-                output_dir / "test_predictions.npy",
-                test_predictions
+                output_dir / "test_predictions.npy", test_predictions
             )
 
             # plot training, save figure and log artifact
@@ -325,6 +387,7 @@ def main(cfg: DictConfig):
             )
 
     return val_mpjpe
+
 
 if __name__ == "__main__":
     main()

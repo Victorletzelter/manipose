@@ -15,7 +15,7 @@ class LiftingDiffusionModel(nn.Module):
         self,
         config: DictConfig,
         act: nn.Module,
-        device: Union[str, torch.DeviceObjType]
+        device: Union[str, torch.DeviceObjType],
     ):
         super().__init__()
         self.device = device
@@ -27,9 +27,7 @@ class LiftingDiffusionModel(nn.Module):
                 mix_mode=config_diff.cond_mix_mode,
             )
         else:
-            raise ValueError(
-                "Invalid value for conditioning param."
-            )
+            raise ValueError("Invalid value for conditioning param.")
         self.conditioning.to(self.device)
 
         # Whether to predict the whole 3D pose or only the depth
@@ -46,8 +44,7 @@ class LiftingDiffusionModel(nn.Module):
             )
         else:
             raise ValueError(
-                "Architecture param could not be recognized: "
-                f"{config.model.arch}."
+                "Architecture param could not be recognized: " f"{config.model.arch}."
             )
 
         # for evaluation
@@ -67,12 +64,7 @@ class LiftingDiffusionModel(nn.Module):
             num_steps=config_diff.num_steps,
         )
 
-        self.alpha_torch = (
-            torch.tensor(self.alpha)
-            .float()
-            .to(self.device)
-            .unsqueeze(1)
-        )
+        self.alpha_torch = torch.tensor(self.alpha).float().to(self.device).unsqueeze(1)
 
     def calc_loss_valid(
         self,
@@ -171,6 +163,5 @@ class LiftingDiffusionModel(nn.Module):
             return hypothesis.mean(dim=1)
         else:
             raise ValueError(
-                "Implemented aggregation strategies are 'average'."
-                f"Got {mode}."
+                "Implemented aggregation strategies are 'average'." f"Got {mode}."
             )

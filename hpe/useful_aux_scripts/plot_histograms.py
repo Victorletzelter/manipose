@@ -20,18 +20,14 @@ from mh_so3_hpe.metrics import sagittal_symmetry_per_bone
 
 # %% - fetch GT data
 data_dir = Path("/home/crommel/shared/crommel/h36m_data")
-preproc_dataset_path = data_dir / (
-    "preproc_data_3d_h36m_17_mh_so3_hpe.pkl"
-)
+preproc_dataset_path = data_dir / ("preproc_data_3d_h36m_17_mh_so3_hpe.pkl")
 
 if preproc_dataset_path.exists():
     print("==> Loading preprocessed dataset...")
     with open(preproc_dataset_path, "rb") as f:
         dataset = pickle.load(f)
 
-inputs_path = data_dir / (
-    "data_2d_h36m_cpn_ft_h36m_dbb.npz"
-)
+inputs_path = data_dir / ("data_2d_h36m_cpn_ft_h36m_dbb.npz")
 keypoints = create_2d_data(inputs_path, dataset)
 
 # %%
@@ -39,6 +35,7 @@ keypoints = create_2d_data(inputs_path, dataset)
 TEXT_WIDTH = 3.25
 PAGE_WIDTH = 6.875
 FONTSIZE = 10
+
 
 def setup_style(grid=False, column_fig=False, fontsize=FONTSIZE):
     # plt.style.use("seaborn-paper")
@@ -63,11 +60,18 @@ def setup_style(grid=False, column_fig=False, fontsize=FONTSIZE):
         }
     )
 
+
 # %% -- coordwise errors data
 mlflow_base_path = Path("/home/crommel/shared/crommel/mlflow_files/mlruns")
-cw_path_mixste = mlflow_base_path / "408976714800957044/477c4759516d4e91bb6370a42704f511/artifacts/cw_err.csv"
+cw_path_mixste = (
+    mlflow_base_path
+    / "408976714800957044/477c4759516d4e91bb6370a42704f511/artifacts/cw_err.csv"
+)
 # cw_path_mhmc = mlflow_base_path / "408976714800957044/ab7c835939564abfb014027b0d8db3ee/artifacts/cw_err.csv"
-cw_path_mhmc = mlflow_base_path / "550333576130974034/f078246cece241fda4a78b99a726d306/artifacts/cw_err.csv"
+cw_path_mhmc = (
+    mlflow_base_path
+    / "550333576130974034/f078246cece241fda4a78b99a726d306/artifacts/cw_err.csv"
+)
 
 # %%
 cw_mixste = pd.read_csv(cw_path_mixste, index_col=0)
@@ -86,8 +90,14 @@ cw_errs["Coordinate"] = cw_errs.index
 cw_errs = cw_errs.reset_index(drop=True)
 
 # %% -- jointwise errors data
-jw_path_mixste = mlflow_base_path / "408976714800957044/477c4759516d4e91bb6370a42704f511/artifacts/jw_err.csv"
-jw_path_mhmc = mlflow_base_path / "550333576130974034/f078246cece241fda4a78b99a726d306/artifacts/jw_err.csv"
+jw_path_mixste = (
+    mlflow_base_path
+    / "408976714800957044/477c4759516d4e91bb6370a42704f511/artifacts/jw_err.csv"
+)
+jw_path_mhmc = (
+    mlflow_base_path
+    / "550333576130974034/f078246cece241fda4a78b99a726d306/artifacts/jw_err.csv"
+)
 # jw_path_mhmc = mlflow_base_path / "408976714800957044/ab7c835939564abfb014027b0d8db3ee/artifacts/jw_err.csv"
 
 # %%
@@ -113,8 +123,14 @@ jw_errs = jw_errs.reset_index(drop=True)
 
 
 # %% -- jointwise segs std data
-seg_path_mixste = mlflow_base_path / "408976714800957044/477c4759516d4e91bb6370a42704f511/artifacts/seg_consistency.csv"
-seg_path_mhmc = mlflow_base_path / "550333576130974034/f078246cece241fda4a78b99a726d306/artifacts/seg_consistency.csv"
+seg_path_mixste = (
+    mlflow_base_path
+    / "408976714800957044/477c4759516d4e91bb6370a42704f511/artifacts/seg_consistency.csv"
+)
+seg_path_mhmc = (
+    mlflow_base_path
+    / "550333576130974034/f078246cece241fda4a78b99a726d306/artifacts/seg_consistency.csv"
+)
 # seg_path_mhmc = mlflow_base_path / "408976714800957044/ab7c835939564abfb014027b0d8db3ee/artifacts/seg_consistency.csv"
 
 # %%
@@ -137,8 +153,14 @@ seg_errs = seg_errs.reset_index(drop=True)
 # seg_errs["Segment"] = seg_errs["Segment"].apply(lambda x: x.replace("->", "-"))
 
 # %% -- jointwise sym gap data
-sym_path_mixste = mlflow_base_path / "408976714800957044/477c4759516d4e91bb6370a42704f511/artifacts/seg_symmetry.csv"
-sym_path_mhmc = mlflow_base_path / "550333576130974034/f078246cece241fda4a78b99a726d306/artifacts/seg_symmetry.csv"
+sym_path_mixste = (
+    mlflow_base_path
+    / "408976714800957044/477c4759516d4e91bb6370a42704f511/artifacts/seg_symmetry.csv"
+)
+sym_path_mhmc = (
+    mlflow_base_path
+    / "550333576130974034/f078246cece241fda4a78b99a726d306/artifacts/seg_symmetry.csv"
+)
 # sym_path_mhmc = mlflow_base_path / "408976714800957044/ab7c835939564abfb014027b0d8db3ee/artifacts/seg_symmetry.csv"
 
 # %%
@@ -154,7 +176,9 @@ sym_mhmc_ave["model"] = "ManiPose"
 # sym_mhmc_ave["model"] = "MHMC"
 
 sym_errs = pd.concat([sym_mixste_ave, sym_mhmc_ave], axis=0)
-sym_errs = sym_errs.drop(index=["Hip->Spine", "Spine->Thorax", "Thorax->Neck/Nose", 'Neck/Nose->Head'])
+sym_errs = sym_errs.drop(
+    index=["Hip->Spine", "Spine->Thorax", "Thorax->Neck/Nose", "Neck/Nose->Head"]
+)
 sym_errs["Segment"] = sym_errs.index
 sym_errs = sym_errs.reset_index(drop=True)
 
@@ -165,7 +189,8 @@ sym_errs["Segment"] = sym_errs["Segment"].apply(
 sym_errs.drop_duplicates(inplace=True, ignore_index=True)
 # sym_errs["Segment"] = sym_errs["Segment"].apply(lambda x: x.replace("->", "-"))
 sym_errs["Segment"] = [
-    f"{j2}-{j1}" for j1, j2 in dataset.skeleton.bones
+    f"{j2}-{j1}"
+    for j1, j2 in dataset.skeleton.bones
     if j1 in dataset.skeleton.joints_left
 ] * 2
 
@@ -279,9 +304,10 @@ n_cw = len(cw_errs["Coordinate"].unique())
 
 setup_style(grid=False, column_fig=False, fontsize=7)
 fig, ax1 = plt.subplots(
-    1, 1,
+    1,
+    1,
     # gridspec_kw={'width_ratios': [n_jw, n_sym]},
-    figsize=(TEXT_WIDTH, 0.6 * TEXT_WIDTH)
+    figsize=(TEXT_WIDTH, 0.6 * TEXT_WIDTH),
     # figsize=(TEXT_WIDTH, 1.2 * TEXT_WIDTH)
 )
 
@@ -296,12 +322,7 @@ hue_dict = {
 }
 
 sns.barplot(
-    jw_errs,
-    x="Joint",
-    y="JW-MPJPE [mm]",
-    hue="model",
-    palette=hue_dict,
-    ax=ax1
+    jw_errs, x="Joint", y="JW-MPJPE [mm]", hue="model", palette=hue_dict, ax=ax1
 )
 ax1.set_ylabel("Joint-wise\nMPJPE [mm]")
 # sns.barplot(
@@ -316,13 +337,14 @@ ax1.set_ylabel("Joint-wise\nMPJPE [mm]")
 # for ax in ax_list:
 ax1.get_legend().remove()
 ax1.set_xlabel("Joint")
-ax1.tick_params(axis='x', labelrotation = 90)
+ax1.tick_params(axis="x", labelrotation=90)
 ax1.set_ylim(15, ax1.get_ylim()[1])
 
 handles, labels = ax1.get_legend_handles_labels()
 fig.legend(
-    handles, labels,
-    loc='upper center',
+    handles,
+    labels,
+    loc="upper center",
     ncol=2,
 )
 fig.tight_layout(rect=[0, 0, 1, 0.95])
@@ -396,7 +418,7 @@ gt_segs_std_df = pd.DataFrame(
     segs_std.numpy(),
     # segs_std.numpy()[None, :],
     # columns=dataset.skeleton.bones_names
-    columns=["JW Seg. Length STD [mm]"]
+    columns=["JW Seg. Length STD [mm]"],
 )
 gt_segs_std_df["model"] = "Ground-Truth"
 gt_segs_std_df["Segment"] = [f"{j2}-{j1}" for j1, j2 in dataset.skeleton.bones]
@@ -404,15 +426,12 @@ gt_segs_std_df["Segment"] = [f"{j2}-{j1}" for j1, j2 in dataset.skeleton.bones]
 # gt_segs_std_df["Segment"] = gt_segs_std_df["Segment"].apply(lambda x: x.replace("->", "-"))
 
 # %%
-completed_seg_errs = pd.concat([seg_errs, gt_segs_std_df], axis=0,
-                               ignore_index=True)
+completed_seg_errs = pd.concat([seg_errs, gt_segs_std_df], axis=0, ignore_index=True)
 # %%
-gt_sym_err_df = pd.DataFrame(
-    sym_err.numpy(),
-    columns=["JW Symmetry Gap [mm]"]
-)
+gt_sym_err_df = pd.DataFrame(sym_err.numpy(), columns=["JW Symmetry Gap [mm]"])
 lat_segs = [
-    f"{j2}-{j1}" for j1, j2 in dataset.skeleton.bones
+    f"{j2}-{j1}"
+    for j1, j2 in dataset.skeleton.bones
     if j1 in dataset.skeleton.joints_left
 ]
 # lat_segs = list(dataset.skeleton.bones_names)
@@ -425,8 +444,7 @@ gt_sym_err_df["model"] = "Ground-Truth"
 gt_sym_err_df["Segment"] = lat_segs
 
 # %%
-completed_sym_errs = pd.concat([sym_errs, gt_sym_err_df], axis=0,
-                               ignore_index=True)
+completed_sym_errs = pd.concat([sym_errs, gt_sym_err_df], axis=0, ignore_index=True)
 
 
 # setup_style(grid=False, column_fig=False, fontsize=8)
@@ -481,9 +499,10 @@ completed_sym_errs = pd.concat([sym_errs, gt_sym_err_df], axis=0,
 # %% - BASE FOR PAPER FIGURE
 setup_style(grid=False, column_fig=False, fontsize=6)
 fig, ax_list = plt.subplots(
-    1, 3,
-    gridspec_kw={'width_ratios': [n_seg, n_sym, n_cw]},
-    figsize=(0.8*PAGE_WIDTH, PAGE_WIDTH / 4)
+    1,
+    3,
+    gridspec_kw={"width_ratios": [n_seg, n_sym, n_cw]},
+    figsize=(0.8 * PAGE_WIDTH, PAGE_WIDTH / 4),
 )
 
 reg_cpal = sns.color_palette()
@@ -502,7 +521,7 @@ sns.barplot(
     y="JW Seg. Length STD [mm]",
     hue="model",
     palette=hue_dict,
-    ax=ax_list[0]
+    ax=ax_list[0],
 )
 sns.barplot(
     completed_sym_errs,
@@ -510,7 +529,7 @@ sns.barplot(
     y="JW Symmetry Gap [mm]",
     hue="model",
     palette=hue_dict,
-    ax=ax_list[1]
+    ax=ax_list[1],
 )
 sns.barplot(
     cw_errs,
@@ -518,11 +537,11 @@ sns.barplot(
     y="CW-MPJPE [mm]",
     hue="model",
     palette=hue_dict,
-    ax=ax_list[2]
+    ax=ax_list[2],
 )
 ax_list[2].set_ylim(10, ax_list[2].get_ylim()[1])
 for ax in ax_list[:-1]:
-    ax.tick_params(axis='x', labelrotation = 90)
+    ax.tick_params(axis="x", labelrotation=90)
 for ax in ax_list:
     ax.get_legend().remove()
 
@@ -533,8 +552,9 @@ ax_list[2].set_ylabel("MPJPE per\nCoordinate [mm]")
 
 handles, labels = ax_list[0].get_legend_handles_labels()
 fig.legend(
-    handles, labels,
-    loc='upper center',
+    handles,
+    labels,
+    loc="upper center",
     ncol=3,
 )
 fig.tight_layout(rect=[0, 0, 1, 0.85], pad=0.1, h_pad=0.1, w_pad=0.5)
@@ -544,9 +564,10 @@ fig.savefig("figures/seg_std_sym_coorderr_with_gt_manipose_new.svg")
 # %% - SEGMENTS STD AND COORDWISE ERRORS FOR MIXSTE ALONE
 setup_style(grid=False, column_fig=False, fontsize=7)
 fig, ax_list = plt.subplots(
-    1, 2,
-    gridspec_kw={'width_ratios': [n_cw, n_seg]},
-    figsize=(PAGE_WIDTH / 2, PAGE_WIDTH / 4)
+    1,
+    2,
+    gridspec_kw={"width_ratios": [n_cw, n_seg]},
+    figsize=(PAGE_WIDTH / 2, PAGE_WIDTH / 4),
 )
 
 sns.barplot(
@@ -554,18 +575,18 @@ sns.barplot(
     x="Segment",
     y="JW Seg. Length STD [mm]",
     hue="model",
-    ax=ax_list[1]
+    ax=ax_list[1],
 )
 sns.barplot(
     cw_errs.query("model != 'ManiPose'").reset_index(drop=True),
     x="Coordinate",
     y="CW-MPJPE [mm]",
     hue="model",
-    ax=ax_list[0]
+    ax=ax_list[0],
 )
 ax_list[0].set_ylim(10, ax_list[0].get_ylim()[1])
 
-ax_list[1].tick_params(axis='x', labelrotation = 90)
+ax_list[1].tick_params(axis="x", labelrotation=90)
 for ax in ax_list:
     ax.get_legend().remove()
 
@@ -575,15 +596,12 @@ ax_list[0].set_ylabel("MPJPE per\nCoordinate [mm]")
 
 handles, labels = ax_list[1].get_legend_handles_labels()
 fig.legend(
-    handles, labels,
-    loc='upper center',
+    handles,
+    labels,
+    loc="upper center",
     ncol=3,
 )
-fig.tight_layout(rect=[0, 0, 1, 0.85])  #, pad=0.1, h_pad=0.1, w_pad=0.5)
-fig.savefig(
-    "figures/seg_std_coorderr_mixste.png",
-    bbox_inches="tight",
-    dpi=1000
-)
+fig.tight_layout(rect=[0, 0, 1, 0.85])  # , pad=0.1, h_pad=0.1, w_pad=0.5)
+fig.savefig("figures/seg_std_coorderr_mixste.png", bbox_inches="tight", dpi=1000)
 
 # %%

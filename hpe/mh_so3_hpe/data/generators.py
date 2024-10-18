@@ -160,9 +160,7 @@ class PoseSequenceGenerator(Dataset):
 
         # Whether to sample an the occlusion pattern uniformly or set it
         if self.miss_type == "all":
-            miss_type = np.random.choice(
-                list(self.possible_miss_types_rates.keys())
-            )
+            miss_type = np.random.choice(list(self.possible_miss_types_rates.keys()))
             miss_rate = self.possible_miss_types_rates[miss_type]
         else:
             miss_type = self.miss_type
@@ -191,20 +189,16 @@ class PoseSequenceGenerator(Dataset):
             # Structured Joint Missing
             mask = np.ones(pose_seq_shape)
             occl_len = int(self._seq_len * miss_rate)
-            rand = np.random.choice(
-                self._seq_len - occl_len, size=1, replace=False
-            )
+            rand = np.random.choice(self._seq_len - occl_len, size=1, replace=False)
             right_leg = [1, 2, 3]  # TODO: make compatible with other skels?
 
-            mask[rand[0]: rand[0] + occl_len, right_leg] = 0.0
+            mask[rand[0] : rand[0] + occl_len, right_leg] = 0.0
         elif miss_type == "structured_frame":
             # Structured Frame Missing
             mask = np.ones(pose_seq_shape)
             occl_len = int(self._seq_len * miss_rate)
-            rand = np.random.choice(
-                self._seq_len - occl_len, size=1, replace=False
-            )
-            mask[rand[0]: rand[0] + occl_len] = 0.0
+            rand = np.random.choice(self._seq_len - occl_len, size=1, replace=False)
+            mask[rand[0] : rand[0] + occl_len] = 0.0
         elif miss_type == "noisy":
             # Noisy
             mask = np.ones(pose_seq_shape)

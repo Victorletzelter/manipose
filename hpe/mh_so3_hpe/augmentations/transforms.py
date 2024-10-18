@@ -20,9 +20,6 @@ class PoseFlip(nn.Module):
     ) -> torch.Tensor:
         # augment only with probability=self.probability
         if torch.rand(1).item() <= self.probability:
-            return pose_flip(
-                poses_tuple=poses_tuple,
-                skeleton=self.skeleton
-            )
+            return pose_flip(poses_tuple=poses_tuple, skeleton=self.skeleton)
 
         return poses_tuple

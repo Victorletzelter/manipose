@@ -24,20 +24,10 @@ def weighted_mpjpe_loss(
     weights = weights[None, None, :].to(prediction.device)
     if dims is None:
         return torch.mean(
-            weights * torch.norm(
-                prediction - target,
-                p=2,
-                dim=len(target.shape)-1
-            )
+            weights * torch.norm(prediction - target, p=2, dim=len(target.shape) - 1)
         )
     else:
-        ret = (
-            weights * torch.norm(
-                prediction - target,
-                p=2,
-                dim=len(target.shape)-1
-            )
-        )
+        ret = weights * torch.norm(prediction - target, p=2, dim=len(target.shape) - 1)
         for dim in dims:
             ret = ret.mean(dim=dim)
         return ret
@@ -59,13 +49,13 @@ def weighted_mse_loss(
     assert weights.shape[0] == target.shape[-2]
     if dims is None:
         return torch.mean(
-            weights[None, None, :, None].to(prediction.device) *
-            (prediction - target)**2
+            weights[None, None, :, None].to(prediction.device)
+            * (prediction - target) ** 2
         )
     else:
         ret = (
-            weights[None, None, :, None].to(prediction.device) *
-            (prediction - target)**2
+            weights[None, None, :, None].to(prediction.device)
+            * (prediction - target) ** 2
         )
         for dim in dims:
             ret = ret.mean(dim=dim)
@@ -91,13 +81,10 @@ def mean_velocity_error(
     velocity_target = torch.diff(target, dim=axis)
 
     if squared:
-        return torch.mean((velocity_predicted - velocity_target)**2)
+        return torch.mean((velocity_predicted - velocity_target) ** 2)
     else:
         return torch.mean(
-            torch.norm(
-                velocity_predicted - velocity_target,
-                dim=len(target.shape)-1
-            )
+            torch.norm(velocity_predicted - velocity_target, dim=len(target.shape) - 1)
         )
 
 
@@ -159,7 +146,7 @@ def wta_with_scoring_loss(
     gt_scores = torch.zeros((batch_size, L, H))  # (B, L, H)
     batch_indices = torch.arange(batch_size)[:, None].repeat(1, L)
     seq_indices = torch.arange(L).repeat(batch_size, 1)
-    gt_scores[batch_indices, seq_indices, active_heads_idx] = 1.
+    gt_scores[batch_indices, seq_indices, active_heads_idx] = 1.0
     gt_scores = gt_scores.permute(0, 2, 1).to(scores.device)  # (B, H, L)
 
     scoring_loss = F.binary_cross_entropy(

@@ -78,14 +78,14 @@ class ManifoldMixSTE(nn.Module):
         bones_lengths = self.segments_module(x)  # (B, S, 1)
 
         # We suppose that the root is always the reference (e.g. at 0,0,0)
-        root_positions = torch.zeros(B*L, 3, device=x.device)
+        root_positions = torch.zeros(B * L, 3, device=x.device)
 
         poses = self.decoder(
-            rotations_repr=rearrange(rotations, 'B L J D -> (B L) J D'),
+            rotations_repr=rearrange(rotations, "B L J D -> (B L) J D"),
             bones_lengths_repr=bones_lengths,
             root_positions=root_positions,
         )
-        return rearrange(poses, '(B L) J D -> B L J D', B=B, L=L)
+        return rearrange(poses, "(B L) J D -> B L J D", B=B, L=L)
 
 
 class BonesMixSTE(MixSTE):
@@ -142,9 +142,7 @@ class BonesMixSTE(MixSTE):
         x = rearrange(x, "B L J C  -> (B L) (J C)")
         x = self.joints_to_segments_proj(x)
         x = rearrange(
-            x,
-            "(B L) (S C) -> B L S C",
-            B=B, L=L, S=self.num_bones, C=self.embed_dim
+            x, "(B L) (S C) -> B L S C", B=B, L=L, S=self.num_bones, C=self.embed_dim
         )
 
         x = super().forward(x)  # (B, L, S, 1), where S is the # of segments

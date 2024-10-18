@@ -9,9 +9,9 @@ import torch.nn.functional as F
 
 
 def betas_for_alpha_bar(
-  num_diffusion_timesteps: int,
-  alpha_bar: Callable,
-  max_beta: float = 0.5,
+    num_diffusion_timesteps: int,
+    alpha_bar: Callable,
+    max_beta: float = 0.5,
 ) -> np.array:
     # """
     # Create a beta schedule that discretizes the given alpha_t_bar
@@ -41,8 +41,8 @@ def compute_noise_scheduling(
     if schedule == "quad":
         beta = (
             np.linspace(
-                beta_start ** 0.5,
-                beta_end ** 0.5,
+                beta_start**0.5,
+                beta_end**0.5,
                 num_steps,
             )
             ** 2
@@ -57,17 +57,13 @@ def compute_noise_scheduling(
         beta = betas_for_alpha_bar(
             num_steps,
             lambda t: math.cos((t + 0.008) / 1.008 * math.pi / 2) ** 2,
-            max_beta=beta_end
+            max_beta=beta_end,
         )
 
     alpha_hat = 1 - beta
     alpha = np.cumprod(alpha_hat)
 
-    sigma = (
-        (1.0 - alpha[:-1])
-        / (1.0 - alpha[1:])
-        * beta[1:]
-    ) ** 0.5
+    sigma = ((1.0 - alpha[:-1]) / (1.0 - alpha[1:]) * beta[1:]) ** 0.5
     return beta, alpha, alpha_hat, sigma
 
 
@@ -107,7 +103,5 @@ class DiffusionEmbedding(nn.Module):
             0
         )  # (1,dim)
         table = steps * frequencies  # (T,dim)
-        table = torch.cat(
-            [torch.sin(table), torch.cos(table)], dim=1
-        )  # (T,dim*2)
+        table = torch.cat([torch.sin(table), torch.cos(table)], dim=1)  # (T,dim*2)
         return table

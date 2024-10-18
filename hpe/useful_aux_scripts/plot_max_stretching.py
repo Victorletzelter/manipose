@@ -11,9 +11,7 @@ import seaborn as sns
 
 # %% - fetch GT data
 data_dir = Path("/home/crommel/shared/crommel/h36m_data")
-preproc_dataset_path = data_dir / (
-    "preproc_data_3d_h36m_17_mh_so3_hpe.pkl"
-)
+preproc_dataset_path = data_dir / ("preproc_data_3d_h36m_17_mh_so3_hpe.pkl")
 
 if preproc_dataset_path.exists():
     print("==> Loading preprocessed dataset...")
@@ -22,8 +20,12 @@ if preproc_dataset_path.exists():
 
 # %% - Max stretching
 
-mixste_data_path = Path("/home/crommel/shared/crommel/mlflow_files/mlruns/705717003473657216/24cd074f1df1439abfdf186d74c439fc/artifacts")
-manipose_data_path = Path("/home/crommel/shared/crommel/mlflow_files/mlruns/705717003473657216/c6bfd675966c4378baa397d64f806364/artifacts")
+mixste_data_path = Path(
+    "/home/crommel/shared/crommel/mlflow_files/mlruns/705717003473657216/24cd074f1df1439abfdf186d74c439fc/artifacts"
+)
+manipose_data_path = Path(
+    "/home/crommel/shared/crommel/mlflow_files/mlruns/705717003473657216/c6bfd675966c4378baa397d64f806364/artifacts"
+)
 # mixste_data_path = Path("/home/crommel/shared/crommel/mlflow_files/mlruns/483843057870309330/2a787541d99b4645906bbf1d6b21424f/artifacts")
 # manipose_data_path = Path("/home/crommel/shared/crommel/mlflow_files/mlruns/483843057870309330/c9253820a6d5474da79fe1c62fde441d/artifacts")
 
@@ -31,8 +33,12 @@ manipose_data_path = Path("/home/crommel/shared/crommel/mlflow_files/mlruns/7057
 
 mixste_stretch = pd.read_csv(mixste_data_path / "seg_max_strech.csv", index_col=0)
 manipose_stretch = pd.read_csv(manipose_data_path / "seg_max_strech.csv", index_col=0)
-mixste_vstretch = pd.read_csv(mixste_data_path / "seg_max_delta_strech.csv", index_col=0)
-manipose_vstretch = pd.read_csv(manipose_data_path / "seg_max_delta_strech.csv", index_col=0)
+mixste_vstretch = pd.read_csv(
+    mixste_data_path / "seg_max_delta_strech.csv", index_col=0
+)
+manipose_vstretch = pd.read_csv(
+    manipose_data_path / "seg_max_delta_strech.csv", index_col=0
+)
 
 # %%
 mixste_ave_stretch = mixste_stretch.loc["average", :].to_frame()
@@ -85,6 +91,7 @@ TEXT_WIDTH = 3.25
 PAGE_WIDTH = 6.875
 FONTSIZE = 10
 
+
 def setup_style(grid=False, column_fig=False, fontsize=FONTSIZE):
     # plt.style.use("seaborn-paper")
     plt.style.use("seaborn-v0_8")
@@ -108,10 +115,17 @@ def setup_style(grid=False, column_fig=False, fontsize=FONTSIZE):
         }
     )
 
+
 # %% -- jointwise errors data
 mlflow_base_path = Path("/home/crommel/shared/crommel/mlflow_files/mlruns")
-jw_path_mixste = mlflow_base_path / "408976714800957044/477c4759516d4e91bb6370a42704f511/artifacts/jw_err.csv"
-jw_path_mhmc = mlflow_base_path / "408976714800957044/ab7c835939564abfb014027b0d8db3ee/artifacts/jw_err.csv"
+jw_path_mixste = (
+    mlflow_base_path
+    / "408976714800957044/477c4759516d4e91bb6370a42704f511/artifacts/jw_err.csv"
+)
+jw_path_mhmc = (
+    mlflow_base_path
+    / "408976714800957044/ab7c835939564abfb014027b0d8db3ee/artifacts/jw_err.csv"
+)
 
 # %%
 jw_mixste = pd.read_csv(jw_path_mixste, index_col=0)
@@ -136,10 +150,7 @@ jw_errs = jw_errs.reset_index(drop=True)
 
 # %%
 setup_style(grid=False, column_fig=False, fontsize=7)
-fig, ax_list = plt.subplots(
-    2, 1,
-    figsize=(TEXT_WIDTH, 1.2 * TEXT_WIDTH)
-)
+fig, ax_list = plt.subplots(2, 1, figsize=(TEXT_WIDTH, 1.2 * TEXT_WIDTH))
 sns.barplot(
     data=jw_errs,
     x="Joint",
@@ -159,12 +170,13 @@ ax_list[1].set_ylabel("Average bone stretching\nper segment [mm]")
 for ax in ax_list:
     ax.get_legend().remove()
     # ax.set_xlabel("")
-    ax.tick_params(axis='x', labelrotation = 90)
+    ax.tick_params(axis="x", labelrotation=90)
 ax_list[0].set_ylim(15, ax_list[0].get_ylim()[1])
 handles, labels = ax.get_legend_handles_labels()
 fig.legend(
-    handles, labels,
-    loc='upper center',
+    handles,
+    labels,
+    loc="upper center",
     ncol=2,
 )
 fig.tight_layout(rect=[0, 0, 1, 0.95])

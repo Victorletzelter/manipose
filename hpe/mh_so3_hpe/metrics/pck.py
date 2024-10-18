@@ -2,9 +2,7 @@ import numpy as np
 import torch
 
 
-def compute_similarity_transform(source_points,
-                                 target_points,
-                                 return_tform=False):
+def compute_similarity_transform(source_points, target_points, return_tform=False):
     """Computes a similarity transform (sR, t) that takes a set of 3D points
     source_points (N x 3) closest to a set of 3D points target_points, where R
     is an 3x3 rotation matrix, t 3x1 translation, s scale.
@@ -64,11 +62,7 @@ def compute_similarity_transform(source_points,
     source_points_hat = source_points_hat.T
 
     if return_tform:
-        return source_points_hat, {
-            'rotation': R,
-            'scale': scale,
-            'translation': t
-        }
+        return source_points_hat, {"rotation": R, "scale": scale, "translation": t}
 
     return source_points_hat
 
@@ -89,7 +83,7 @@ def handle_tensors(*tensors):
     return new_tensors
 
 
-def keypoint_3d_pck(pred, gt, mask=None, alignment='none', threshold=150.):
+def keypoint_3d_pck(pred, gt, mask=None, alignment="none", threshold=150.0):
     """Calculate the Percentage of Correct Keypoints (3DPCK) w. or w/o rigid
     alignment.
     Paper ref: `Monocular 3D Human Pose Estimation In The Wild Using Improved
@@ -120,20 +114,22 @@ def keypoint_3d_pck(pred, gt, mask=None, alignment='none', threshold=150.):
     assert mask.any()
     pred, gt = handle_tensors(pred, gt)
 
-    if alignment == 'none':
+    if alignment == "none":
         pass
-    elif alignment == 'procrustes':
-        pred = np.stack([
-            compute_similarity_transform(pred_i, gt_i)
-            for pred_i, gt_i in zip(pred, gt)
-        ])
-    elif alignment == 'scale':
-        pred_dot_pred = np.einsum('nkc,nkc->n', pred, pred)
-        pred_dot_gt = np.einsum('nkc,nkc->n', pred, gt)
+    elif alignment == "procrustes":
+        pred = np.stack(
+            [
+                compute_similarity_transform(pred_i, gt_i)
+                for pred_i, gt_i in zip(pred, gt)
+            ]
+        )
+    elif alignment == "scale":
+        pred_dot_pred = np.einsum("nkc,nkc->n", pred, pred)
+        pred_dot_gt = np.einsum("nkc,nkc->n", pred, gt)
         scale_factor = pred_dot_gt / pred_dot_pred
         pred = pred * scale_factor[:, None, None]
     else:
-        raise ValueError(f'Invalid value for alignment: {alignment}')
+        raise ValueError(f"Invalid value for alignment: {alignment}")
 
     error = np.linalg.norm(pred - gt, ord=2, axis=-1)
     pck = (error < threshold).astype(np.float32)[mask].mean() * 100
@@ -141,7 +137,7 @@ def keypoint_3d_pck(pred, gt, mask=None, alignment='none', threshold=150.):
     return pck
 
 
-def keypoint_3d_auc(pred, gt, mask=None, alignment='none'):
+def keypoint_3d_auc(pred, gt, mask=None, alignment="none"):
     """Calculate the Area Under the Curve (3DAUC) computed for a range of 3DPCK
     thresholds.
     Paper ref: `Monocular 3D Human Pose Estimation In The Wild Using Improved
@@ -172,24 +168,26 @@ def keypoint_3d_auc(pred, gt, mask=None, alignment='none'):
 
     pred, gt = handle_tensors(pred, gt)
 
-    if alignment == 'none':
+    if alignment == "none":
         pass
-    elif alignment == 'procrustes':
-        pred = np.stack([
-            compute_similarity_transform(pred_i, gt_i)
-            for pred_i, gt_i in zip(pred, gt)
-        ])
-    elif alignment == 'scale':
-        pred_dot_pred = np.einsum('nkc,nkc->n', pred, pred)
-        pred_dot_gt = np.einsum('nkc,nkc->n', pred, gt)
+    elif alignment == "procrustes":
+        pred = np.stack(
+            [
+                compute_similarity_transform(pred_i, gt_i)
+                for pred_i, gt_i in zip(pred, gt)
+            ]
+        )
+    elif alignment == "scale":
+        pred_dot_pred = np.einsum("nkc,nkc->n", pred, pred)
+        pred_dot_gt = np.einsum("nkc,nkc->n", pred, gt)
         scale_factor = pred_dot_gt / pred_dot_pred
         pred = pred * scale_factor[:, None, None]
     else:
-        raise ValueError(f'Invalid value for alignment: {alignment}')
+        raise ValueError(f"Invalid value for alignment: {alignment}")
 
     error = np.linalg.norm(pred - gt, ord=2, axis=-1)
 
-    thresholds = np.linspace(0., 150, 31)
+    thresholds = np.linspace(0.0, 150, 31)
     pck_values = np.zeros(len(thresholds))
     for i in range(len(thresholds)):
         pck_values[i] = (error < thresholds[i]).astype(np.float32)[mask].mean()

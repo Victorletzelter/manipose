@@ -110,7 +110,6 @@ def seed_worker(worker_id):
 
 
 def polar2cartesian(r, theta):
-
     """
     polar22cartesian(r,theta)
     =========================
@@ -164,7 +163,12 @@ def save_and_log_np_artifact(save_path, data_arr):
 
 
 def save_state(
-    model, optimizer, scheduler, epoch_no, foldername, log_in_mlf=False,
+    model,
+    optimizer,
+    scheduler,
+    epoch_no,
+    foldername,
+    log_in_mlf=False,
     tag=None,
 ):
     foldername = Path(foldername)

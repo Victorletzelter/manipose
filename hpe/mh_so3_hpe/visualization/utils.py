@@ -40,15 +40,13 @@ def setup_style(grid=False, column_fig=False, fontsize=FONTSIZE, lw=1.0):
 
 def prep_data_for_viz(cfg, dataset, keypoints):
     poses_2d_subj = {
-        k.lower().split(" ")[0]: v
-        for k, v in keypoints[cfg.viz.viz_subject].items()
+        k.lower().split(" ")[0]: v for k, v in keypoints[cfg.viz.viz_subject].items()
     }
     poses_2d = poses_2d_subj[cfg.viz.viz_action]
     out_poses_2d = poses_2d[cfg.viz.viz_camera]
 
     poses_3d_subj = {
-        k.lower().split(" ")[0]: v
-        for k, v in dataset[cfg.viz.viz_subject].items()
+        k.lower().split(" ")[0]: v for k, v in dataset[cfg.viz.viz_subject].items()
     }
     poses_3d = poses_3d_subj[cfg.viz.viz_action]["positions_3d"]
     assert len(poses_3d) == len(poses_2d), "Camera count mismatch"

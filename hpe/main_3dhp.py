@@ -27,22 +27,36 @@ from mh_so3_hpe.architectures import ManifoldMixSTE, MixSTE, RMCLManifoldMixSTE
 from mh_so3_hpe.architectures.utils.mup_utils import mu_init_params
 from mh_so3_hpe.augmentations import PoseFlip
 from mh_so3_hpe.data import Dataset3DHP, PoseSequenceGenerator, Skeleton
-from mh_so3_hpe.metrics import (STANDARD_H36M_WEIGHTS, coordwise_error,
-                                jointwise_error, keypoint_3d_auc,
-                                keypoint_3d_pck, mean_velocity_error,
-                                sagittal_symmetry, sagittal_symmetry_per_bone,
-                                segments_time_consistency,
-                                segments_time_consistency_per_bone,
-                                smoothness_regularization, weighted_mpjpe_loss,
-                                weighted_mse_loss,
-                                wta_l2_loss_and_activate_head,
-                                wta_with_scoring_loss)
-from mh_so3_hpe.utils import (log_metric_to_mlflow, log_metrics_to_mlflow,
-                              log_param_to_mlf, log_params_from_omegaconf_dict,
-                              seed_worker, set_random_seeds)
-from mh_so3_hpe.visualization import (prep_data_for_viz,
-                                      prepare_prediction_for_viz,
-                                      render_animation)
+from mh_so3_hpe.metrics import (
+    STANDARD_H36M_WEIGHTS,
+    coordwise_error,
+    jointwise_error,
+    keypoint_3d_auc,
+    keypoint_3d_pck,
+    mean_velocity_error,
+    sagittal_symmetry,
+    sagittal_symmetry_per_bone,
+    segments_time_consistency,
+    segments_time_consistency_per_bone,
+    smoothness_regularization,
+    weighted_mpjpe_loss,
+    weighted_mse_loss,
+    wta_l2_loss_and_activate_head,
+    wta_with_scoring_loss,
+)
+from mh_so3_hpe.utils import (
+    log_metric_to_mlflow,
+    log_metrics_to_mlflow,
+    log_param_to_mlf,
+    log_params_from_omegaconf_dict,
+    seed_worker,
+    set_random_seeds,
+)
+from mh_so3_hpe.visualization import (
+    prep_data_for_viz,
+    prepare_prediction_for_viz,
+    render_animation,
+)
 
 
 def save_csv_log(
@@ -108,15 +122,9 @@ def make_loss(config_train, model, skeleton):
     if not use_wta_loss:
         time_axis = 1
         if config_train.sq_loss:
-            loss_terms["wloss"] = (
-                partial(weighted_mse_loss, weights=weights),
-                2
-            )
+            loss_terms["wloss"] = (partial(weighted_mse_loss, weights=weights), 2)
         else:
-            loss_terms["wloss"] = (
-                partial(weighted_mpjpe_loss, weights=weights),
-                2
-            )
+            loss_terms["wloss"] = (partial(weighted_mpjpe_loss, weights=weights), 2)
     else:
         time_axis = 2
 
@@ -128,6 +136,7 @@ def make_loss(config_train, model, skeleton):
                 squared=config_train.sq_loss,
             )
             return unagg_wta_loss.mean()
+
         loss_terms["wloss"] = (wloss, 2)
 
         def score_reg(hypothesis, scores, y):
@@ -141,9 +150,11 @@ def make_loss(config_train, model, skeleton):
             )
 
             return scoring_loss
+
         loss_terms["score_reg"] = (score_reg, 3)
 
     if use_vel_loss:
+
         def vloss(preds, targets):
             return config_train.vel_loss * mean_velocity_error(
                 predicted=preds,
@@ -151,23 +162,28 @@ def make_loss(config_train, model, skeleton):
                 squared=config_train.sq_loss,
                 axis=time_axis,
             )
+
         loss_terms["vloss"] = (vloss, 2)
 
     if use_smooth_reg:
+
         def sreg(preds):
             return config_train.smooth_reg * smoothness_regularization(
                 prediction=preds,
                 weights=weights,
                 axis=time_axis,
             )
+
         loss_terms["sreg"] = (sreg, 1)
     if use_rigid_seg_reg:
+
         def rigid_seg_reg(preds):
             return config_train.rigid_seg_reg * segments_time_consistency(
                 preds.permute(0, 3, 2, 1),
                 skeleton=skeleton,
                 mode="sum",
             )
+
         loss_terms["rigid_seg_reg"] = (rigid_seg_reg, 1)
     return loss_terms
 
@@ -192,8 +208,7 @@ def compute_and_acc_loss(
             loss_term_val = term_func(prediction, y)
         else:
             raise ValueError(
-                "Unexpected n_inputs in loss term computation"
-                f": {n_inputs}."
+                "Unexpected n_inputs in loss term computation" f": {n_inputs}."
             )
         loss += loss_term_val
 
@@ -219,21 +234,11 @@ def train(
     load_state = config.run.checkpoint_params != ""
 
     if config.model.mup:
-        optimizer = MuAdam(
-            model.parameters(),
-            lr=cfg_train.lr,
-            weight_decay=1e-6
-        )
+        optimizer = MuAdam(model.parameters(), lr=cfg_train.lr, weight_decay=1e-6)
     else:
-        optimizer = Adam(
-            model.parameters(),
-            lr=cfg_train.lr,
-            weight_decay=1e-6
-        )
+        optimizer = Adam(model.parameters(), lr=cfg_train.lr, weight_decay=1e-6)
     if load_state:
-        optimizer.load_state_dict(
-            torch.load(config.run.checkpoint_params)["optimizer"]
-        )
+        optimizer.load_state_dict(torch.load(config.run.checkpoint_params)["optimizer"])
 
     lr_scheduler_type = cfg_train.lr_scheduler
     if lr_scheduler_type == "cosine":
@@ -330,11 +335,12 @@ def train(
             avg_loss_valid = 0
             avg_loss_terms_valid = defaultdict(int)
             with torch.no_grad():
-                with tqdm(
-                    valid_loader, mininterval=5.0, maxinterval=50.0
-                ) as it:
+                with tqdm(valid_loader, mininterval=5.0, maxinterval=50.0) as it:
                     for batch_no, (X_val, y_val) in enumerate(it, start=1):
-                        X_val, y_val = X_val.to(device).float(), y_val.to(device).float()
+                        X_val, y_val = (
+                            X_val.to(device).float(),
+                            y_val.to(device).float(),
+                        )
                         prediction = model(X_val)
 
                         loss = compute_and_acc_loss(
@@ -349,8 +355,7 @@ def train(
                         avg_loss_valid += loss.item()
                         it.set_postfix(
                             ordered_dict={
-                                "valid_avg_epoch_loss": avg_loss_valid
-                                / batch_no,
+                                "valid_avg_epoch_loss": avg_loss_valid / batch_no,
                                 "epoch": epoch_no,
                             },
                             refresh=False,
@@ -491,9 +496,7 @@ def train(
             mlflow_on=mlflow_on,
         )
 
-    save_state(
-        model, optimizer, lr_scheduler, cfg_train.epochs, foldername, tag="end"
-    )
+    save_state(model, optimizer, lr_scheduler, cfg_train.epochs, foldername, tag="end")
     np.save(f"{foldername}/train_loss.npy", np.array(train_loss))
     np.save(f"{foldername}/valid_loss.npy", np.array(valid_loss))
 
@@ -520,7 +523,7 @@ def fetch_and_prepare_data(cfg, proj_name, train):
 
         dataset = Dataset3DHP(
             config=cfg,
-            root_path=str(data_dir)+"/",
+            root_path=str(data_dir) + "/",
             train=train,
         )
 
@@ -549,9 +552,7 @@ def create_dataloader(
     )
     data_loader = DataLoader(
         generator,
-        batch_size=(
-            cfg.train.batch_size if train else cfg.train.batch_size_test
-        ),
+        batch_size=(cfg.train.batch_size if train else cfg.train.batch_size_test),
         shuffle=True if train else False,
         num_workers=cfg.train.workers,
         pin_memory=True,
@@ -676,13 +677,9 @@ def main(cfg: DictConfig):
     proj_name = original_cwd.parents[0].name
     dataset_train, dataset_test = None, None
     if cfg.run.train:
-        dataset_train = fetch_and_prepare_data(
-            cfg, proj_name=proj_name, train=True
-        )
+        dataset_train = fetch_and_prepare_data(cfg, proj_name=proj_name, train=True)
     if cfg.run.test:
-        dataset_test = fetch_and_prepare_data(
-            cfg, proj_name=proj_name, train=False
-        )
+        dataset_test = fetch_and_prepare_data(cfg, proj_name=proj_name, train=False)
 
     # Set seeds for init reproducibility
     print(f"==> Setting seeds to {cfg.run.seed} for init")
@@ -722,6 +719,7 @@ def main(cfg: DictConfig):
     if mlflow_on:
         # Lazy import of MLFlow if requested
         import mlflow as mlf
+
         mlf.set_tracking_uri(cfg.run.mlflow_uri)
         mlf.set_experiment(cfg.run.experiment)
 
@@ -769,9 +767,7 @@ def main(cfg: DictConfig):
         if cfg.run.test:
             analytics = {
                 k: (
-                    np.zeros(
-                        [1, dataset_test.skeleton.num_bones]
-                    ),
+                    np.zeros([1, dataset_test.skeleton.num_bones]),
                     dataset_test.skeleton.bones_names,
                 )
                 for k in ["seg_symmetry", "seg_consistency"]
@@ -822,9 +818,7 @@ def main(cfg: DictConfig):
                 )
 
             with torch.no_grad():
-                generated_poses = torch.cat(
-                    generated_poses, dim=0
-                ).permute(0, 3, 2, 1)
+                generated_poses = torch.cat(generated_poses, dim=0).permute(0, 3, 2, 1)
                 mpsse = (
                     sagittal_symmetry(
                         joints_coords=generated_poses,
@@ -839,8 +833,9 @@ def main(cfg: DictConfig):
                 mpsce = (
                     segments_time_consistency(
                         joints_coords=(
-                            generated_poses.permute(1, 2, 0, 3)  # 3, J, B, L
-                                            .reshape(1, 3, J, -1)  # 1, 3, J, B*L
+                            generated_poses.permute(1, 2, 0, 3).reshape(  # 3, J, B, L
+                                1, 3, J, -1
+                            )  # 1, 3, J, B*L
                         ),
                         skeleton=dataset_test.skeleton,
                         mode="std",
@@ -883,7 +878,7 @@ def main(cfg: DictConfig):
                     pred=generated_poses.permute(0, 3, 2, 1).reshape(-1, J, 3),
                     gt=target_poses.reshape(-1, J, 3),
                     mask=None,
-                    threshold=150
+                    threshold=150,
                 )
 
                 auc = keypoint_3d_auc(
@@ -893,14 +888,14 @@ def main(cfg: DictConfig):
                 )
 
                 if isinstance(model, RMCLManifoldMixSTE):
-                    aggregated_poses = torch.cat(
-                        aggregated_poses, dim=0
-                    ).permute(0, 3, 2, 1)
+                    aggregated_poses = torch.cat(aggregated_poses, dim=0).permute(
+                        0, 3, 2, 1
+                    )
                     agg_pck = keypoint_3d_pck(
                         pred=aggregated_poses.permute(0, 3, 2, 1).reshape(-1, J, 3),
                         gt=target_poses.reshape(-1, J, 3),
                         mask=None,
-                        threshold=150
+                        threshold=150,
                     )
 
                     agg_auc = keypoint_3d_auc(

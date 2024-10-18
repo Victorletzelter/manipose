@@ -48,7 +48,7 @@ def setup_style(grid=False, column_fig=False):
 
 
 def plot_circle(
-    r: float = 1.,
+    r: float = 1.0,
     axes: str = "off",
     fs: float = FONTSIZE,
     ax: Optional[plt.Axes] = None,
@@ -56,7 +56,7 @@ def plot_circle(
     show_center: bool = False,
     show_input_ax: bool = True,
     show_input_ax_label: bool = False,
-    inputs_offset: float = 2.,
+    inputs_offset: float = 2.0,
     show_output_axs: bool = False,
 ):
     # Angular grid
@@ -77,7 +77,7 @@ def plot_circle(
     # Axis center
     if show_center:
         ax.scatter(0, 0, marker="+", s=50, color="black")
-    
+
     if show_ticks:
         #  Add axes angles in radians
         ax.text(0.8, -0.05, r"$0$", fontsize=fs)
@@ -94,8 +94,10 @@ def plot_circle(
     # plot inputs axis
     if show_input_ax:
         ax.arrow(
-            -1.2 * r, -inputs_offset,
-            2.4 * r, 0.,
+            -1.2 * r,
+            -inputs_offset,
+            2.4 * r,
+            0.0,
             width=0.01,
             head_width=0.1,
             edgecolor=None,
@@ -107,8 +109,10 @@ def plot_circle(
     # plot both outputs axis
     if show_output_axs:
         ax.arrow(
-            0., 0.,
-            1.2 * r, 0.,
+            0.0,
+            0.0,
+            1.2 * r,
+            0.0,
             width=0.01,
             head_width=0.1,
             edgecolor=None,
@@ -117,8 +121,10 @@ def plot_circle(
         ax.text(1.2 * r, -0.2 * r, s="x")
 
         ax.arrow(
-            0., 0.,
-            0., 1.2 * r,
+            0.0,
+            0.0,
+            0.0,
+            1.2 * r,
             width=0.01,
             head_width=0.1,
             edgecolor=None,
@@ -143,7 +149,6 @@ def plot_angular_density(
     label: Optional[str] = None,
     inputs_offset: float = 2.0,
 ):
-
     """
     plot_angular_density(theta,pdf,colour="blue",maxline=False,axes="off",fs=16)
     ============================================================================
@@ -209,7 +214,6 @@ def plot_angular_density(
 
 
 def distinct_colours(labels):
-
     """
     distinct_colours(labels)
     ========================
@@ -246,10 +250,7 @@ def distinct_colours(labels):
     return dic
 
 
-def plot_angular_scatter(
-    samples, labels=None, r=1.0, ms=100, axes="off", ax=None
-):
-
+def plot_angular_scatter(samples, labels=None, r=1.0, ms=100, axes="off", ax=None):
     """
     plot_angular_scatter(samples,labels=None,ms=100)
     ================================================
@@ -398,9 +399,7 @@ def plot_predictions(
     )
 
     # plot GT
-    ax.scatter(
-        Y_test[:, 0], Y_test[:, 1], marker="x", label="GT", c=palette[1]
-    )
+    ax.scatter(Y_test[:, 0], Y_test[:, 1], marker="x", label="GT", c=palette[1])
 
     # plot predictions
     for i, (method, predictions) in enumerate(predictions_dict.items()):

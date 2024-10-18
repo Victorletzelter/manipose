@@ -15,11 +15,13 @@ from omegaconf import DictConfig, OmegaConf
 from torch import nn
 
 from mh_so3_hpe.architectures import RMCLManifoldMixSTE
-from mh_so3_hpe.visualization import (prep_data_for_viz,
-                                      prepare_prediction_for_viz,
-                                      render_animation,
-                                      render_frame_prediction,
-                                      render_rotated_frame_prediction)
+from mh_so3_hpe.visualization import (
+    prep_data_for_viz,
+    prepare_prediction_for_viz,
+    render_animation,
+    render_frame_prediction,
+    render_rotated_frame_prediction,
+)
 
 METHODS = {
     "RMCLManifoldMixSTE": "MHMC",
@@ -92,9 +94,7 @@ def main(cfg: DictConfig):
 
         multihyp = cfg.viz.hypothesis and isinstance(model, RMCLManifoldMixSTE)
         prediction = prepare_prediction_for_viz(
-            prediction=prediction,
-            cam=cam,
-            multihyp=multihyp
+            prediction=prediction, cam=cam, multihyp=multihyp
         )
         method = METHODS[type(model).__name__]
         anim_output[method] = prediction
@@ -156,30 +156,29 @@ def main(cfg: DictConfig):
             )
         else:
             # Create file name
-            azim_min = (
-                float(cfg.viz.azim) if cfg.viz.azim != "" else cam["azimuth"]
-            )
+            azim_min = float(cfg.viz.azim) if cfg.viz.azim != "" else cam["azimuth"]
             azim_max = float(cfg.viz.azim_max)
-            output_name = (
-                figures_dir / (
-                    f"{output_name}_{cfg.viz.frame_index}_"
-                    f"azim{azim_min}-{azim_max}.{cfg.viz.extension}"
-                )
+            output_name = figures_dir / (
+                f"{output_name}_{cfg.viz.frame_index}_"
+                f"azim{azim_min}-{azim_max}.{cfg.viz.extension}"
             )
 
             #  Create list of azimut values
             frames_per_phase = cfg.viz.stationary_frames
             azim_list = np.linspace(
-                azim_min, azim_max,
+                azim_min,
+                azim_max,
                 num=frames_per_phase,
             )
 
             # Pad it so that we can clearly see the starting and end azims
-            azim_list = np.concatenate([
-                azim_min * np.ones(frames_per_phase),
-                azim_list,
-                azim_max * np.ones(frames_per_phase),
-            ])
+            azim_list = np.concatenate(
+                [
+                    azim_min * np.ones(frames_per_phase),
+                    azim_list,
+                    azim_max * np.ones(frames_per_phase),
+                ]
+            )
 
             render_rotated_frame_prediction(
                 frame_index=cfg.viz.frame_index,

@@ -22,11 +22,7 @@ class MixtureVonMises:
         assert all(self.weights >= 0)
         self.modes = np.array(modes)
         self.dispersions = np.array(dispersions)
-        assert (
-            self.weights.shape[0]
-            == self.modes.shape[0]
-            == self.dispersions.shape[0]
-        )
+        assert self.weights.shape[0] == self.modes.shape[0] == self.dispersions.shape[0]
 
         self.rng = check_random_state(random_state)
         self.components = np.arange(0, self.weights.shape[0])
@@ -60,38 +56,42 @@ class MixtureVonMises:
 
 class BivariateVonMises:
 
-    def __init__(self,phi_loc,
-        psi_loc,
-        phi_concentration,
-        psi_concentration,
-        correlation=None):
+    def __init__(
+        self, phi_loc, psi_loc, phi_concentration, psi_concentration, correlation=None
+    ):
 
-        self.Dist = SineBivariateVonMises(phi_loc=phi_loc,psi_loc=psi_loc,phi_concentration=phi_concentration,psi_concentration=psi_concentration,correlation=correlation)
+        self.Dist = SineBivariateVonMises(
+            phi_loc=phi_loc,
+            psi_loc=psi_loc,
+            phi_concentration=phi_concentration,
+            psi_concentration=psi_concentration,
+            correlation=correlation,
+        )
 
-    def sample(self,n_samples):
-    
-        return self.Dist.sample(sample_shape=(n_samples,1)).squeeze(1)
+    def sample(self, n_samples):
+
+        return self.Dist.sample(sample_shape=(n_samples, 1)).squeeze(1)
+
 
 class BivariateVonMisesMixture:
 
-    def __init__(self,weights: Tuple,
+    def __init__(
+        self,
+        weights: Tuple,
         modes: Tuple,
         dispersions: Tuple,
         random_state: int = 1234,
-        correlation=None):
+        correlation=None,
+    ):
 
-        assert abs(sum(weights)-1) <= 1e-5
+        assert abs(sum(weights) - 1) <= 1e-5
         self.weights = np.array(weights)
         assert all(self.weights >= 0)
         self.modes = np.array(modes)
         self.dispersions = np.array(dispersions)
         self.correlation = correlation
 
-        assert (
-            self.weights.shape[0]
-            == self.modes.shape[0]
-            == self.dispersions.shape[0]
-        )
+        assert self.weights.shape[0] == self.modes.shape[0] == self.dispersions.shape[0]
 
         self.rng = check_random_state(random_state)
         self.components = np.arange(0, self.weights.shape[0])
@@ -113,8 +113,8 @@ class BivariateVonMisesMixture:
         z = minor_radius * np.sin(angles[:, 0])
 
         return np.stack((x, y, z), axis=1)  # shape (n_samples, 3)
-    
-    def torus_cartesian_to_angles_batch(self,major_radius, minor_radius, points):
+
+    def torus_cartesian_to_angles_batch(self, major_radius, minor_radius, points):
         """
         Converts a batch of points in 3D Euclidean space to angles on a torus.
 
@@ -139,12 +139,12 @@ class BivariateVonMisesMixture:
         theta = (theta + 2 * np.pi) % (2 * np.pi)
 
         return np.column_stack((phi, theta))
-    
+
     def pdf(self, angles):
         angles = np.array(angles)
         # if len(angles.shape) > 0:
-            # angles = angles[:, None]
-        if self.correlation is None :
+        # angles = angles[:, None]
+        if self.correlation is None:
 
             # d = np.cos(np.repeat(np.expand_dims(angles[:,0],1),2,axis=-1) - np.repeat(np.expand_dims(self.modes[:,0],0),repeats=angles.shape[0],axis=0))
             # c = np.cos(np.repeat(np.expand_dims(angles[:,0],1),2,axis=-1) - np.repeat(np.expand_dims(self.modes[:,0],0),repeats=angles.shape[0],axis=0))+np.repeat(np.expand_dims(self.dispersions[:,1],0),repeats=angles.shape[0],axis=0) * np.cos(np.repeat(np.expand_dims(angles[:,1],1),repeats=2,axis=-1) - np.repeat(np.expand_dims(self.modes[1,:],0),repeats=angles.shape[0],axis=0))
@@ -153,36 +153,95 @@ class BivariateVonMisesMixture:
             #               axis=1)
             # h = self.dist.Dist.norm_const.cpu().numpy()
 
-            norm_c = np.concatenate([np.array([e.Dist.norm_const.cpu().numpy()]) for e in self.dist_list],axis=0).reshape(1,-1)
-            norm_c = np.repeat(norm_c,angles.shape[0],axis=0)
+            norm_c = np.concatenate(
+                [np.array([e.Dist.norm_const.cpu().numpy()]) for e in self.dist_list],
+                axis=0,
+            ).reshape(1, -1)
+            norm_c = np.repeat(norm_c, angles.shape[0], axis=0)
 
             # return np.sum(np.repeat(self.weights.reshape(1,-1),angles.shape[0],axis=0) * np.exp(np.cos(np.repeat(np.expand_dims(angles[:,0],1),2,axis=-1) - np.repeat(np.expand_dims(self.modes[:,0],0),repeats=angles.shape[0],axis=0))+np.repeat(np.expand_dims(self.dispersions[:,1],0),repeats=angles.shape[0],axis=0) * np.cos(np.repeat(np.expand_dims(angles[:,1],1),repeats=2,axis=-1) - np.repeat(np.expand_dims(self.modes[1,:],0),repeats=angles.shape[0],axis=0))),
             #               axis=1)
 
             N_modes = self.modes.shape[0]
 
-            before_sum = np.repeat(self.weights.reshape(1,-1),angles.shape[0],axis=0) * np.exp(np.cos(np.repeat(np.expand_dims(angles[:,0],1),N_modes,axis=-1) - np.repeat(np.expand_dims(self.modes[:,0],0),repeats=angles.shape[0],axis=0))+np.repeat(np.expand_dims(self.dispersions[:,1],0),repeats=angles.shape[0],axis=0) * np.cos(np.repeat(np.expand_dims(angles[:,1],1),repeats=N_modes,axis=-1) - np.repeat(np.expand_dims(self.modes[:,1],0),repeats=angles.shape[0],axis=0)))
+            before_sum = np.repeat(
+                self.weights.reshape(1, -1), angles.shape[0], axis=0
+            ) * np.exp(
+                np.cos(
+                    np.repeat(np.expand_dims(angles[:, 0], 1), N_modes, axis=-1)
+                    - np.repeat(
+                        np.expand_dims(self.modes[:, 0], 0),
+                        repeats=angles.shape[0],
+                        axis=0,
+                    )
+                )
+                + np.repeat(
+                    np.expand_dims(self.dispersions[:, 1], 0),
+                    repeats=angles.shape[0],
+                    axis=0,
+                )
+                * np.cos(
+                    np.repeat(np.expand_dims(angles[:, 1], 1), repeats=N_modes, axis=-1)
+                    - np.repeat(
+                        np.expand_dims(self.modes[:, 1], 0),
+                        repeats=angles.shape[0],
+                        axis=0,
+                    )
+                )
+            )
 
-            return np.sum(np.repeat(self.weights.reshape(1,-1),angles.shape[0],axis=0) * np.exp(np.cos(np.repeat(np.expand_dims(angles[:,0],1),N_modes,axis=-1) - np.repeat(np.expand_dims(self.modes[:,0],0),repeats=angles.shape[0],axis=0))+np.repeat(np.expand_dims(self.dispersions[:,1],0),repeats=angles.shape[0],axis=0) * np.cos(np.repeat(np.expand_dims(angles[:,1],1),repeats=N_modes,axis=-1) - np.repeat(np.expand_dims(self.modes[:,1],0),repeats=angles.shape[0],axis=0)))/norm_c,
-                          axis=1)
+            return np.sum(
+                np.repeat(self.weights.reshape(1, -1), angles.shape[0], axis=0)
+                * np.exp(
+                    np.cos(
+                        np.repeat(np.expand_dims(angles[:, 0], 1), N_modes, axis=-1)
+                        - np.repeat(
+                            np.expand_dims(self.modes[:, 0], 0),
+                            repeats=angles.shape[0],
+                            axis=0,
+                        )
+                    )
+                    + np.repeat(
+                        np.expand_dims(self.dispersions[:, 1], 0),
+                        repeats=angles.shape[0],
+                        axis=0,
+                    )
+                    * np.cos(
+                        np.repeat(
+                            np.expand_dims(angles[:, 1], 1), repeats=N_modes, axis=-1
+                        )
+                        - np.repeat(
+                            np.expand_dims(self.modes[:, 1], 0),
+                            repeats=angles.shape[0],
+                            axis=0,
+                        )
+                    )
+                )
+                / norm_c,
+                axis=1,
+            )
 
             # return np.sum(np.repeat(self.weights.reshape(1,-1),angles.shape[0],axis=0) * np.exp(np.cos(np.repeat(np.expand_dims(angles[:,0],1),2,axis=-1) - np.repeat(np.expand_dims(self.modes[:,0],0),repeats=angles.shape[0],axis=0))+np.repeat(np.expand_dims(self.dispersions[:,1],0),repeats=angles.shape[0],axis=0) * np.cos(np.repeat(np.expand_dims(angles[:,1],1),repeats=2,axis=-1) - np.repeat(np.expand_dims(self.modes[1,:],0),repeats=angles.shape[0],axis=0))),
             #               axis=1)/ self.dist.Dist.norm_const.cpu().numpy()
 
-        else :
+        else:
             # raise error
             raise NotImplementedError
 
-    def pytorch_torusanglestocartesian(self,major_radius, minor_radius, angles) :
+    def pytorch_torusanglestocartesian(self, major_radius, minor_radius, angles):
         """Converts angles on a torus to points the 3D euclidean space"""
         # angles: array of shape (n_samples, 2)
         # radius: float
 
-        x = (major_radius + minor_radius*torch.cos(angles[:,0]))*torch.cos(angles[:,1])
-        y = (major_radius + minor_radius*torch.cos(angles[:,0]))*torch.sin(angles[:,1])
-        z = minor_radius*torch.sin(angles[:,0])
+        x = (major_radius + minor_radius * torch.cos(angles[:, 0])) * torch.cos(
+            angles[:, 1]
+        )
+        y = (major_radius + minor_radius * torch.cos(angles[:, 0])) * torch.sin(
+            angles[:, 1]
+        )
+        z = minor_radius * torch.sin(angles[:, 0])
 
-        return torch.stack((x,y,z), dim=1) # shape (n_samples, 3)
+        return torch.stack((x, y, z), dim=1)  # shape (n_samples, 3)
 
     def sample(self, size: int) -> np.array:
         self.picked_components = self.rng.choice(
@@ -191,22 +250,28 @@ class BivariateVonMisesMixture:
             p=self.weights,
         )
 
-        samples = np.empty(shape=(size,2))
+        samples = np.empty(shape=(size, 2))
 
         for c, mu, kappa in zip(self.components, self.modes, self.dispersions):
-            
-            self.dist = BivariateVonMises(phi_loc=mu[0], psi_loc=mu[1],phi_concentration=kappa[0],psi_concentration=kappa[1],correlation=0.)
+
+            self.dist = BivariateVonMises(
+                phi_loc=mu[0],
+                psi_loc=mu[1],
+                phi_concentration=kappa[0],
+                psi_concentration=kappa[1],
+                correlation=0.0,
+            )
 
             mask = self.picked_components == c
             size_c = sum(mask)
-            samples[mask] = self.dist.sample(n_samples=size_c)  
+            samples[mask] = self.dist.sample(n_samples=size_c)
 
         return samples
-    
-    def visualize(self,n_samples,r=0.5,R=3): 
+
+    def visualize(self, n_samples, r=0.5, R=3):
 
         angles = self.sample(n_samples)
-                
+
         # Convert angles to Cartesian coordinates
         x = (R + r * np.cos(angles[:, 0])) * np.cos(angles[:, 1])
         y = (R + r * np.cos(angles[:, 0])) * np.sin(angles[:, 1])
@@ -214,7 +279,7 @@ class BivariateVonMisesMixture:
 
         # Create a 3D plot with wireframe torus
         fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(111, projection="3d")
 
         # Create a meshgrid for the torus
         u = np.linspace(0, 2 * np.pi, 100)
@@ -225,11 +290,13 @@ class BivariateVonMisesMixture:
         Z = r * np.sin(V)
 
         # Plot the torus surface
-        ax.plot_surface(X, Y, Z, rstride=5, cstride=5,color='k', edgecolors='w',alpha=.1)
+        ax.plot_surface(
+            X, Y, Z, rstride=5, cstride=5, color="k", edgecolors="w", alpha=0.1
+        )
 
         # Create a colormap for the modes
         # cmap = plt.get_cmap("hsv", len(self.components))
-        cmap = ['red','green','yellow','purple']
+        cmap = ["red", "green", "yellow", "purple"]
 
         # Plot each mode with a different color
         for c, mu, kappa in zip(self.components, self.modes, self.dispersions):
@@ -238,13 +305,15 @@ class BivariateVonMisesMixture:
             y_mode = y[mask]
             z_mode = z[mask]
 
-            ax.scatter(x_mode, y_mode, z_mode, c=cmap[c], marker='o', s=5, label=f'Mode {c}')
+            ax.scatter(
+                x_mode, y_mode, z_mode, c=cmap[c], marker="o", s=5, label=f"Mode {c}"
+            )
 
         # Set labels and title
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-        ax.set_title('Mixture of Bivariate Cauchy Distributions Torus')
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.set_zlabel("Z")
+        ax.set_title("Mixture of Bivariate Cauchy Distributions Torus")
 
         # Set axis limits for better visualization
         ax.set_xlim(-R - r, R + r)
@@ -260,6 +329,7 @@ class BivariateVonMisesMixture:
 
         # Show the plot
         plt.show()
+
 
 class LiftingDist1Dto2D(MixtureVonMises):
     def __init__(
@@ -281,8 +351,6 @@ class LiftingDist1Dto2D(MixtureVonMises):
         return x, np.hstack([x[:, None], y[:, None]])
 
 
-
-
 class LiftingDist2Dto3D(BivariateVonMisesMixture):
     def __init__(
         self,
@@ -301,19 +369,40 @@ class LiftingDist2Dto3D(BivariateVonMisesMixture):
         self.major_radius = major_radius
         self.minor_radius = minor_radius
 
-        self.dist_list  = list()
+        self.dist_list = list()
 
         for c, mu, kappa in zip(self.components, self.modes, self.dispersions):
-            self.dist_list.append(BivariateVonMises(phi_loc=mu[0], psi_loc=mu[1],phi_concentration=kappa[0],psi_concentration=kappa[1],correlation=0.))
+            self.dist_list.append(
+                BivariateVonMises(
+                    phi_loc=mu[0],
+                    psi_loc=mu[1],
+                    phi_concentration=kappa[0],
+                    psi_concentration=kappa[1],
+                    correlation=0.0,
+                )
+            )
 
     def sample(self, size: int, output_components=False) -> Tuple[np.array, np.array]:
         angles = super().sample(size)
-        cartesian_points = self.torusanglestocartesian(major_radius=self.major_radius,minor_radius=self.minor_radius,angles=angles)
-        assert np.shape(np.stack((cartesian_points[:,0],cartesian_points[:,2]),axis=-1)) == (size,2)
-        assert np.shape(cartesian_points) == (size,3)
+        cartesian_points = self.torusanglestocartesian(
+            major_radius=self.major_radius,
+            minor_radius=self.minor_radius,
+            angles=angles,
+        )
+        assert np.shape(
+            np.stack((cartesian_points[:, 0], cartesian_points[:, 2]), axis=-1)
+        ) == (size, 2)
+        assert np.shape(cartesian_points) == (size, 3)
 
         if output_components is True:
-            return np.stack((cartesian_points[:,0],cartesian_points[:,2]),axis=-1), cartesian_points, self.picked_components
-        
-        else : 
-            return np.stack((cartesian_points[:,0],cartesian_points[:,2]),axis=-1), cartesian_points
+            return (
+                np.stack((cartesian_points[:, 0], cartesian_points[:, 2]), axis=-1),
+                cartesian_points,
+                self.picked_components,
+            )
+
+        else:
+            return (
+                np.stack((cartesian_points[:, 0], cartesian_points[:, 2]), axis=-1),
+                cartesian_points,
+            )

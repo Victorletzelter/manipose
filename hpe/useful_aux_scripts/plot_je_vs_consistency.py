@@ -161,30 +161,34 @@ sns.set_theme(style="whitegrid")
 
 # %%
 
+
 def label_points(x, y, size, val, ax):
-    a = pd.concat({'x': x, 'y': y, 'size': (1/72)*np.sqrt(size), 'val': val}, axis=1)
+    a = pd.concat(
+        {"x": x, "y": y, "size": (1 / 72) * np.sqrt(size), "val": val}, axis=1
+    )
     for _, point in a.iterrows():
-        x = point['x'] + point['size'] + .1
-        y = point['y'] - point['size'] + .02
+        x = point["x"] + point["size"] + 0.1
+        y = point["y"] - point["size"] + 0.02
         weight = "normal"
 
-        if "w/ MR" in point['val']:
-            y = point['y'] - point['size'] - 1.6
-            x = point['x'] - point['size'] - 1.
-        elif point['val'] == "ST-GCN":
-            y = point['y'] + 0.5
-            x = point['x'] - 1
+        if "w/ MR" in point["val"]:
+            y = point["y"] - point["size"] - 1.6
+            x = point["x"] - point["size"] - 1.0
+        elif point["val"] == "ST-GCN":
+            y = point["y"] + 0.5
+            x = point["x"] - 1
 
-        if "ManiPose (ours)" in point['val']:
+        if "ManiPose (ours)" in point["val"]:
             weight = "bold"
 
         ax.text(
             x,
             y,
-            str(point['val']),
+            str(point["val"]),
             # fontsize=10,
             weight=weight,
         )
+
 
 # %%
 
@@ -194,6 +198,7 @@ def label_points(x, y, size, val, ax):
 # ECCV PAGE SIZES
 TEXT_WIDTH = 4.80
 FONTSIZE = 11
+
 
 def setup_figure(grid=False, fontsize=FONTSIZE):
     # fig_width = TEXT_WIDTH * 1.2
@@ -233,22 +238,20 @@ ax1 = fig.subplots()
 
 hue_dict = {
     "unconstrained": "#D81B60",
-    "regularized":   "#FFC107",
-    "constrained":   "#004D40",
+    "regularized": "#FFC107",
+    "constrained": "#004D40",
 }
-
-
 
 
 markers_styler = {h: "o" for h in methods["Hypotheses"].unique()}
 markers_styler["1"] = "^"
 k = 100
 markers_sizer = {
-    "1": 1*k,
-    "3–5": 1*k,
-    "10–20": 4*k,
-    "200": 9*k,
-    }
+    "1": 1 * k,
+    "3–5": 1 * k,
+    "10–20": 4 * k,
+    "200": 9 * k,
+}
 
 methods["marker_size"] = methods["Hypotheses"].map(markers_sizer.get)
 
@@ -263,11 +266,11 @@ g1 = sns.scatterplot(
     markers=markers_styler,
     sizes=markers_sizer,
     zorder=2,
-    ax=ax1
+    ax=ax1,
 )
 
-ax1.xaxis.grid(True, "major", linewidth=.25, alpha=0.75)
-ax1.yaxis.grid(True, "major", linewidth=.25, alpha=0.75)
+ax1.xaxis.grid(True, "major", linewidth=0.25, alpha=0.75)
+ax1.yaxis.grid(True, "major", linewidth=0.25, alpha=0.75)
 ax1.set_xlabel(
     r"$\it{good}$ $\leftarrow$ Joint Position Error MPJPE (mm) $\rightarrow$ $\it{bad}$",
     # fontsize=11,
@@ -293,11 +296,14 @@ handlers, labels = ax1.get_legend_handles_labels()
 
 # make subtitles italic
 labels = [
-    ell if ell not in ["Constraints", "Hypotheses"]
-    else r"$\it{{{}}}$".format(ell.replace(' ', r'\;'))
+    (
+        ell
+        if ell not in ["Constraints", "Hypotheses"]
+        else r"$\it{{{}}}$".format(ell.replace(" ", r"\;"))
+    )
     for ell in labels
 ]
-for (h, ell) in zip(handlers, labels):
+for h, ell in zip(handlers, labels):
     if "Hypotheses" in ell:
         break
     if isinstance(h, plt.Line2D):
@@ -310,18 +316,27 @@ for (h, ell) in zip(handlers, labels):
 # box = ax.get_position()
 # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 plt.legend(
-    handlers, labels,
+    handlers,
+    labels,
     # ncol=1,
     loc="lower left",
     fontsize=9,
-    bbox_to_anchor=(1.05, -0.01)
+    bbox_to_anchor=(1.05, -0.01),
 )
 fig.tight_layout()
 
 
-plt.savefig("figures/error_vs_consistency_h36m_and_toy_new_hue.pdf", bbox_inches="tight")
-plt.savefig("figures/error_vs_consistency_h36m_and_toy_new_hue.svg", bbox_inches="tight")
-plt.savefig("figures/error_vs_consistency_h36m_and_toy_new_hue.png", bbox_inches="tight", dpi=1000)
+plt.savefig(
+    "figures/error_vs_consistency_h36m_and_toy_new_hue.pdf", bbox_inches="tight"
+)
+plt.savefig(
+    "figures/error_vs_consistency_h36m_and_toy_new_hue.svg", bbox_inches="tight"
+)
+plt.savefig(
+    "figures/error_vs_consistency_h36m_and_toy_new_hue.png",
+    bbox_inches="tight",
+    dpi=1000,
+)
 
 
 # %%

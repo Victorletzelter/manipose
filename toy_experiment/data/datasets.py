@@ -31,10 +31,7 @@ class LiftingDataset:
         self.validation_set = TensorDataset(self.X_val, self.Y_val)
         self.test_set = TensorDataset(self.X_test, self.Y_test)
 
-    def get_tr_loader(
-            self,
-            **kwargs
-    ) -> DataLoader:
+    def get_tr_loader(self, **kwargs) -> DataLoader:
         if "shuffle" in {**kwargs}:
             raise ValueError(
                 "shuffle kwarg is set to True for training loaders and "
@@ -42,10 +39,7 @@ class LiftingDataset:
             )
         return DataLoader(self.training_set, shuffle=True, **kwargs)
 
-    def get_loaders(
-            self,
-            **kwargs
-    ) -> Tuple[DataLoader, DataLoader, DataLoader]:
+    def get_loaders(self, **kwargs) -> Tuple[DataLoader, DataLoader, DataLoader]:
         if "shuffle" in {**kwargs}:
             raise ValueError(
                 "shuffle kwarg is set to True for training loaders and "
@@ -81,10 +75,7 @@ class LiftingDatasetV2:
         self.validation_set = TensorDataset(self.X_val, self.Y_val)
         self.test_set = TensorDataset(self.X_test, self.Y_test)
 
-    def get_tr_loader(
-            self,
-            **kwargs
-    ) -> DataLoader:
+    def get_tr_loader(self, **kwargs) -> DataLoader:
         if "shuffle" in {**kwargs}:
             raise ValueError(
                 "shuffle kwarg is set to True for training loaders and "
@@ -92,10 +83,7 @@ class LiftingDatasetV2:
             )
         return DataLoader(self.training_set, shuffle=True, **kwargs)
 
-    def get_loaders(
-            self,
-            **kwargs
-    ) -> Tuple[DataLoader, DataLoader, DataLoader]:
+    def get_loaders(self, **kwargs) -> Tuple[DataLoader, DataLoader, DataLoader]:
         if "shuffle" in {**kwargs}:
             raise ValueError(
                 "shuffle kwarg is set to True for training loaders and "
@@ -106,12 +94,16 @@ class LiftingDatasetV2:
             DataLoader(self.validation_set, shuffle=False, **kwargs),
             DataLoader(self.test_set, shuffle=False, **kwargs),
         )
-    
-def to_torchV2(X: np.array, y: np.array) -> Tuple[Tensor, Tensor]: #X of shape (N,2), y of shape (N,3)
+
+
+def to_torchV2(
+    X: np.array, y: np.array
+) -> Tuple[Tensor, Tensor]:  # X of shape (N,2), y of shape (N,3)
     X = torch.from_numpy(X[:, None]).float()
     y = torch.from_numpy(y).float()
     X = X.squeeze(dim=1)
     return X, y
+
 
 def to_torch(X: np.array, y: np.array) -> Tuple[Tensor, Tensor]:
     X = torch.from_numpy(X[:, None]).float()

@@ -11,7 +11,6 @@ from mh_so3_hpe.metrics import keypoint_3d_auc, keypoint_3d_pck, mpjpe_error
 from mh_so3_hpe.data.dataset_3dhp import MAP_H36M_TO_MPI_JOINTS
 
 
-
 # %% FETCH DATASET SKELETON
 
 from mh_so3_hpe.data import Dataset3DHP
@@ -21,11 +20,7 @@ cfg = OmegaConf.load("./conf/config.yaml")
 cfg_3dhp = OmegaConf.load("./conf/data/mpi_inf_3dhp.yaml")
 cfg.data.update(cfg_3dhp)
 
-dataset = Dataset3DHP(
-    config=cfg,
-    root_path=cfg.data.data_dir,
-    train=False
-)
+dataset = Dataset3DHP(config=cfg, root_path=cfg.data.data_dir, train=False)
 
 # %% - LOAD PREDICTED POSES
 pstmo_preds_path = "/home/crommel/workspace/projects/human_pose_lifting/P-STMO/checkpoint/model_81_STMO/inference_data.pkl"
@@ -42,7 +37,7 @@ pstmo_preds = [
     torch.tensor(act_pred).float().permute(2, 3, 1, 0)
     for act_pred in pstmo_preds_dict.values()
 ]
-  # (1, action_leng, J, 3)
+# (1, action_leng, J, 3)
 
 # %%
 
@@ -122,9 +117,7 @@ with open(anatomy3d_preds_path, "rb") as f:
 # %% - CONVERT TO LIST OF TENSORS
 
 for key, arr_list in anatomy3d_preds_dict.items():
-    anatomy3d_preds_dict[key] = np.stack(
-        arr_list, axis=0
-    )
+    anatomy3d_preds_dict[key] = np.stack(arr_list, axis=0)
 
 # %%
 
@@ -172,10 +165,7 @@ with open(mhformer_preds_path, "rb") as f:
 
 for key, arr_list in mhformer_preds_dict.items():
     mhformer_preds_dict[key] = np.concatenate(
-        [
-            arr.reshape(-1, 1, 17, 3)
-            for arr in arr_list
-        ], axis=0
+        [arr.reshape(-1, 1, 17, 3) for arr in arr_list], axis=0
     )
 
 # %%
@@ -224,10 +214,7 @@ with open(stgcn_preds_path, "rb") as f:
 
 for key, arr_list in stgcn_preds_dict.items():
     stgcn_preds_dict[key] = np.concatenate(
-        [
-            arr.reshape(-1, 1, 17, 3)
-            for arr in arr_list
-        ], axis=0
+        [arr.reshape(-1, 1, 17, 3) for arr in arr_list], axis=0
     )
 
 # %%
@@ -275,9 +262,7 @@ with open(videopose_preds_path, "rb") as f:
 # %% - CONVERT TO LIST OF TENSORS
 
 for key, arr_list in videpose_preds_dict.items():
-    videpose_preds_dict[key] = np.stack(
-        arr_list, axis=0
-    )
+    videpose_preds_dict[key] = np.stack(arr_list, axis=0)
 
 # %%
 

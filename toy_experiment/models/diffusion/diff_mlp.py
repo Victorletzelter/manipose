@@ -27,11 +27,7 @@ class DiffMlp(Mlp):
             embedding_dim=hidden_features,
         )
 
-    def forward(
-        self,
-        x: torch.Tensor,
-        diffusion_step: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, diffusion_step: torch.Tensor) -> torch.Tensor:
         x = self.fc_in(x)
         diffusion_emb = self.diffusion_step_enc(diffusion_step)
         x += diffusion_emb
