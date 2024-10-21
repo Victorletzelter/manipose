@@ -193,8 +193,8 @@ bash toy_experiment/quantitative_comparison_toy2d.sh
 ```
 
 The Figure 8 from 2D-to-3D toy experiment can be reprocuced and saved in `toy_experiment/images` by running
-```python toy_experiment/toy-plot.py
-python 
+```python 
+python toy_experiment/toy-plot.py
 ``` 
 
 Table 6 can also be reproced using the command:
